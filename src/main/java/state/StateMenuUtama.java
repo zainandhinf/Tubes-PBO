@@ -1,0 +1,89 @@
+package state;
+
+import javax.swing.JOptionPane;
+import service.ProxyAkun;
+import view.MainFrame;
+
+/**
+ * Kelas StateMenuUtama
+ * State aktif setelah user berhasil Login.
+ * Menangani navigasi ke fitur-fitur lain berdasarkan pilihan menu.
+ */
+public class StateMenuUtama implements StateATM {
+
+    @Override
+    public void pilihMenu(MesinATM atm, int pilihan) {
+        // Helper untuk akses GUI (Casting ke MainFrame)
+        MainFrame frame = (MainFrame) atm.getJendelaUtama();
+
+        switch (pilihan) {
+            case 1: // CEK SALDO
+                System.out.println("[STATE] Pindah ke Cek Saldo");
+                // TODO: Aktifkan jika Faridha sudah buat StateCekSaldo
+                // atm.ubahState(new StateCekSaldo());
+                // frame.gantiLayar("SALDO");
+                break;
+
+            case 2: // TARIK TUNAI
+                System.out.println("[STATE] Pindah ke Tarik Tunai");
+                // TODO: Aktifkan jika Faridha sudah buat StateTarikTunai
+                // atm.ubahState(new StateTarikTunai());
+                // frame.gantiLayar("TARIK");
+                break;
+
+            case 3: // SETOR TUNAI
+                System.out.println("[STATE] Pindah ke Setor Tunai");
+                // TODO: Aktifkan jika Suci sudah buat StateSetorTunai
+                // atm.ubahState(new StateSetorTunai());
+                // frame.gantiLayar("SETOR");
+                break;
+
+            case 4: // TRANSFER
+                System.out.println("[STATE] Pindah ke Transfer");
+                // TODO: Aktifkan jika Suci sudah buat StateTransfer
+                // atm.ubahState(new StateTransfer());
+                // frame.gantiLayar("TRANSFER");
+                break;
+
+            case 5: // RIWAYAT TRANSAKSI
+                System.out.println("[STATE] Pindah ke Riwayat");
+                // TODO: Aktifkan jika Anda sudah buat StateRiwayat
+                // atm.ubahState(new StateRiwayat());
+                // frame.gantiLayar("RIWAYAT");
+                break;
+
+            case 6: // KELUAR (LOGOUT)
+                keluar(atm);
+                break;
+
+            default:
+                JOptionPane.showMessageDialog(null, "Menu tidak valid!");
+        }
+    }
+
+    @Override
+    public void keluar(MesinATM atm) {
+        int confirm = JOptionPane.showConfirmDialog(null, 
+            "Apakah Anda yakin ingin keluar?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            // 1. Proses Logout di Proxy (Security)
+            ProxyAkun proxy = (ProxyAkun) atm.getProxy();
+            proxy.logout();
+
+            // 2. Reset State ke Awal
+            atm.ubahState(new StateSiaga());
+
+            // 3. Ganti Layar ke Welcome
+            MainFrame frame = (MainFrame) atm.getJendelaUtama();
+            frame.gantiLayar("WELCOME");
+            
+            System.out.println("[STATE] User Logout. Kembali ke Siaga.");
+        }
+    }
+
+    // --- Method Tidak Terpakai di Menu Utama ---
+    @Override public void masukkanKartu(MesinATM atm, String nomorKartu) {}
+    @Override public void masukkanPin(MesinATM atm, String pin) {}
+    @Override public void prosesJumlah(MesinATM atm, double jumlah) {}
+}

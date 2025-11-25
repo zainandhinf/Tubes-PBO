@@ -41,9 +41,10 @@ public class StateCekPin implements StateATM {
             // 4. Jika Sukses (Tidak ada Exception):
             JOptionPane.showMessageDialog(null, "Login Berhasil! Selamat Datang.");
             
-            // Pindah State ke Menu Utama
-            // Pastikan Faridha sudah membuat class StateMenuUtama agar baris ini bisa di-uncomment
-            // atm.ubahState(new StateMenuUtama()); 
+            atm.ubahState(new StateMenuUtama());  // Pindah Logic
+            if (atm.getJendelaUtama() instanceof view.MainFrame) {
+                ((view.MainFrame) atm.getJendelaUtama()).gantiLayar("MENU"); // Pindah GUI
+            } 
             System.out.println("[STATE] Transisi ke StateMenuUtama..."); 
             
         } catch (Exception e) {
