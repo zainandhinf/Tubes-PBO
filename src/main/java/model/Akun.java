@@ -25,10 +25,13 @@ public abstract class Akun {
         this.tipeAkun = tipeAkun;
     }
 
-    // --- Method Tambahan untuk Fitur Riwayat ---
-    
-    public void tambahHistori(String pesan) {
-        this.historiTransaksi.add(pesan);
+    /**
+     * Menambahkan data ke list internal.
+     * Method ini dipanggil oleh BankDatabase saat loading dari SQL
+     * atau setelah insert sukses.
+     */
+    public void tambahHistoriInternal(String pesan) {
+        this.historiTransaksi.add(0, pesan); // Add di index 0 agar yang baru ada di atas
     }
 
     public List<String> getHistoriTransaksi() {

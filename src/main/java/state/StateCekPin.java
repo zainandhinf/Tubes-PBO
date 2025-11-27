@@ -24,7 +24,7 @@ public class StateCekPin implements StateATM {
         
         // 2. Ambil Database untuk mencari akun (Simulasi kartu dimasukkan)
         // Dalam simulasi ini, kita menganggap kartu "123456" yang dimasukkan secara otomatis.
-        String nomorKartuTest = "123456"; 
+        String nomorKartuTest = atm.getNomorKartuSementara(); 
         Akun akunTarget = atm.getBankDatabase().getAkun(nomorKartuTest);
 
         // Validasi awal: Cek apakah nomor rekening ada di Database

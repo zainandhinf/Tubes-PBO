@@ -1,5 +1,7 @@
 package state;
 
+import javax.swing.JOptionPane;
+
 import view.MainFrame; // Menggunakan MainFrame
 
 /**
@@ -13,13 +15,25 @@ public class StateSiaga implements StateATM {
     public void masukkanKartu(MesinATM atm, String nomorKartu) {
         System.out.println("[STATE] Kartu " + nomorKartu + " dimasukkan.");
         
-        // 1. Ganti State ke Cek PIN
-        atm.ubahState(new StateCekPin());
-        
-        // 2. Perintahkan GUI untuk ganti layar ke "LOGIN"
-        // Pastikan di MesinATM method getter-nya mengembalikan MainFrame
-        if (atm.getJendelaUtama() instanceof MainFrame) {
-            ((MainFrame) atm.getJendelaUtama()).gantiLayar("LOGIN");
+        if (atm.getBankDatabase().isAkunExist(nomorKartu)) {
+            
+            // Jika Ada: Simpan nomor kartu di memori Mesin
+            atm.setNomorKartuSementara(nomorKartu);
+            
+            // Pindah State
+            atm.ubahState(new StateCekPin());
+            
+            // Ganti Layar
+            if (atm.getJendelaUtama() instanceof MainFrame) {
+                ((MainFrame) atm.getJendelaUtama()).gantiLayar("LOGIN");
+            }
+            
+        } else {
+            // Jika Tidak Ada: Tampilkan Error dan JANGAN pindah layar
+            JOptionPane.showMessageDialog(null, 
+                "Kartu tidak dikenali! Silakan coba nomor lain.", 
+                "Error Kartu", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

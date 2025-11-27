@@ -27,6 +27,11 @@ public class BankDatabase {
 
     private Properties config = new Properties();
 
+    // Simpan kredensial di variabel agar mudah diakses
+    private String dbUrl;
+    private String dbUser;
+    private String dbPass;
+
     // Constructor Private: Agar tidak bisa di-new sembarangan dari luar
     private BankDatabase() {
         loadConfig();
@@ -60,8 +65,81 @@ public class BankDatabase {
                 return;
             }
             config.load(input);
+            this.dbUrl = config.getProperty("db.url");
+            this.dbUser = config.getProperty("db.user");
+            this.dbPass = config.getProperty("db.password");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // ---------------------------------------------------------
+    // KONEKSI & LOAD DATA (SQL)
+    // ---------------------------------------------------------
+    
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
+    }
+
+    // ---------------------------------------------------------
+    // KONEKSI KE POSTGRESQL
+    // ---------------------------------------------------------
+    private void loadDataFromSQL() {
+        System.out.println("[DATABASE] Menghubungkan ke PostgreSQL...");
+
+        try (Connection conn = getConnection()) {
+            if (conn != null) {
+                System.out.println("[DATABASE] Koneksi Sukses!");
+                
+                String sql = "SELECT * FROM akun";
+                try (PreparedStatement pstmt = conn.prepareStatement(sql);
+                     ResultSet rs = pstmt.executeQuery()) {
+                    
+                    while (rs.next()) {
+                        String noRek = rs.getString("no_rek");
+                        String pin = rs.getString("pin");
+                        double saldo = rs.getDouble("saldo");
+                        String tipe = rs.getString("tipe_akun");
+
+                        Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
+                        
+                        // LOAD RIWAYAT TRANSAKSI UNTUK AKUN INI
+                        loadHistoriTransaksi(conn, akunBaru);
+                        
+                        tambahAkun(akunBaru);
+                    }
+                    System.out.println("[DATABASE] " + accounts.size() + " data nasabah & riwayat berhasil dimuat.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("[ERROR] Gagal konek ke Database: " + e.getMessage());
+            loadDummyData(); // Fallback
+        }
+    }
+
+    /**
+     * Mengambil data dari tabel 'transaksi' dan memasukkannya ke List di object Akun
+     */
+    private void loadHistoriTransaksi(Connection conn, Akun akun) {
+        String sql = "SELECT * FROM transaksi WHERE no_rek = ? ORDER BY waktu DESC LIMIT 10";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, akun.getNoRek());
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String jenis = rs.getString("jenis_transaksi");
+                double nominal = rs.getDouble("nominal");
+                String ket = rs.getString("keterangan");
+                String waktu = rs.getString("waktu"); // Timestamp jadi String
+                
+                // Format: [2023-11-20 10:00] TARIK TUNAI - Rp 50.000 (ATM Kampus)
+                String log = String.format("[%s] %s - Rp %,.0f (%s)", waktu, jenis, nominal, ket);
+                
+                // Masukkan ke List di Memory (Tanpa simpan balik ke DB)
+                akun.tambahHistoriInternal(log);
+            }
+        } catch (SQLException e) {
+            System.out.println("[WARN] Gagal load histori untuk " + akun.getNoRek());
         }
     }
 
@@ -76,44 +154,6 @@ public class BankDatabase {
         tambahAkun(new AkunTabungan("999999", "000000", 0, "Gold"));
         
         System.out.println("[DATABASE] " + accounts.size() + " akun berhasil dimuat.");
-    }
-
-    // ---------------------------------------------------------
-    // KONEKSI KE POSTGRESQL
-    // ---------------------------------------------------------
-    private void loadDataFromSQL() {
-        String url = config.getProperty("db.url");
-        String user = config.getProperty("db.user");
-        String pass = config.getProperty("db.password");
-
-        System.out.println("[DATABASE] Menghubungkan ke PostgreSQL...");
-
-        try (Connection conn = DriverManager.getConnection(url, user, pass)) {
-            if (conn != null) {
-                System.out.println("[DATABASE] Koneksi Sukses!");
-                
-                String sql = "SELECT * FROM akun";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql);
-                     ResultSet rs = pstmt.executeQuery()) {
-                    
-                    while (rs.next()) {
-                        String noRek = rs.getString("no_rek");
-                        String pin = rs.getString("pin");
-                        double saldo = rs.getDouble("saldo");
-                        String tipe = rs.getString("tipe_akun");
-
-                        // Masukkan ke HashMap (Cache) agar akses selanjutnya cepat
-                        Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
-                        tambahAkun(akunBaru);
-                    }
-                    System.out.println("[DATABASE] " + accounts.size() + " data nasabah berhasil dimuat dari SQL.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("[ERROR] Gagal konek ke Database: " + e.getMessage());
-            // Fallback ke dummy jika DB gagal, agar aplikasi tidak crash
-            loadDummyData();
-        }
     }
 
     // ---------------------------------------------------------

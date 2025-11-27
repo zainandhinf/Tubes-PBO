@@ -20,13 +20,11 @@ public class MesinATM {
     // Referensi ke GUI Utama agar State bisa ganti-ganti layar
     private JFrame jendelaUtama; 
 
+    // Menyimpan nomor kartu sementara sebelum Login berhasil
+    private String nomorKartuSementara;
+
     public MesinATM() {
         this.bankDatabase = BankDatabase.getInstance();
-        // State awal adalah Siaga (Menunggu Kartu)
-        // Pastikan Anda nanti membuat StateSiaga.java juga!
-        // Untuk sementara jika StateSiaga belum ada, bisa di-null dulu atau buat dummy.
-        // this.stateSaatIni = new StateSiaga(); 
-        
         this.proxy = new ProxyAkun();
     }
 
@@ -76,5 +74,13 @@ public class MesinATM {
 
     public void setJendelaUtama(JFrame frame) {
         this.jendelaUtama = frame;
+    }
+
+    public String getNomorKartuSementara() {
+        return nomorKartuSementara;
+    }
+
+    public void setNomorKartuSementara(String nomorKartuSementara) {
+        this.nomorKartuSementara = nomorKartuSementara;
     }
 }
