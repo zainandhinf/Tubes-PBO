@@ -176,7 +176,10 @@ public class MainFrame extends JFrame {
                     ((WelcomeView) comp).updateCardDisplay(currentInputBuffer);
                 } else if (comp instanceof LoginView) {
                     ((LoginView) comp).updatePinDisplay(currentInputBuffer);
+                } else if (comp instanceof ViewMenu) {
+                    ((ViewMenu) comp).updateMenuInput(currentInputBuffer);
                 }
+                // Nanti tambahkan: else if (comp instanceof WithdrawView) ...
             }
         }
     }
