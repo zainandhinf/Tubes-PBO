@@ -40,7 +40,9 @@ public class StateSetorTunai implements StateATM {
             return;
         }
         try {
-            double nominal = Double.parseDouble(input);
+            // Hilangkan titik ribuan agar input seperti 100.000 dibaca 100000
+            String cleanInput = input.replace(".", "").replace(",", "");
+            double nominal = Double.parseDouble(cleanInput);
             if (nominal <= 0) {
                 JOptionPane.showMessageDialog(gui, "Nominal harus lebih dari 0.");
             } else {

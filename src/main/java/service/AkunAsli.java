@@ -39,6 +39,7 @@ public class AkunAsli implements ITransaksi {
     public void transfer(double jumlah, String tujuan) throws Exception {
         if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
         if (akun.getSaldo() < jumlah) throw new Exception("Saldo tidak cukup");
+        if (akun.getNoRek().equals(tujuan)) throw new Exception("Tidak bisa transfer ke rekening sendiri");
         BankDatabase db = BankDatabase.getInstance();
         Akun akunTujuan = db.getAkun(tujuan);
         if (akunTujuan == null) throw new Exception("Rekening tujuan tidak ditemukan");
