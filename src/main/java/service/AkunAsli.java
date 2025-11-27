@@ -3,6 +3,7 @@ package service;
 import java.util.List;
 
 import model.Akun;
+import model.BankDatabase;
 
 /**
  * Kelas AkunAsli (Real Subject)
@@ -28,12 +29,23 @@ public class AkunAsli implements ITransaksi {
 
     @Override
     public void setorTunai(double jumlah) throws Exception {
-        // TODO: (Tugas Suci) Implementasi logika penambahan saldo di sini
+        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
+        double saldoLama = akun.getSaldo();
+        akun.setSaldo(saldoLama + jumlah);
+        akun.tambahHistoriInternal(String.format("Setor tunai Rp %,.0f", jumlah));
     }
 
     @Override
     public void transfer(double jumlah, String tujuan) throws Exception {
-        // TODO: (Tugas Suci) Implementasi logika transfer antar akun di sini
+        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
+        if (akun.getSaldo() < jumlah) throw new Exception("Saldo tidak cukup");
+        BankDatabase db = BankDatabase.getInstance();
+        Akun akunTujuan = db.getAkun(tujuan);
+        if (akunTujuan == null) throw new Exception("Rekening tujuan tidak ditemukan");
+        akun.setSaldo(akun.getSaldo() - jumlah);
+        akunTujuan.setSaldo(akunTujuan.getSaldo() + jumlah);
+        akun.tambahHistoriInternal(String.format("Transfer ke %s Rp %,.0f", tujuan, jumlah));
+        akunTujuan.tambahHistoriInternal(String.format("Transfer dari %s Rp %,.0f", akun.getNoRek(), jumlah));
     }
 
     @Override

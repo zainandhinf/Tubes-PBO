@@ -13,36 +13,31 @@ public class StateMenuUtama implements StateATM {
 
     @Override
     public void pilihMenu(MesinATM atm, int pilihan) {
-        // Helper untuk akses GUI (Casting ke MainFrame)
         MainFrame frame = (MainFrame) atm.getJendelaUtama();
 
         switch (pilihan) {
             case 1: // CEK SALDO
                 System.out.println("[STATE] Pindah ke Cek Saldo");
-                // TODO: Aktifkan jika Faridha sudah buat StateCekSaldo
                 // atm.ubahState(new StateCekSaldo());
                 // frame.gantiLayar("SALDO");
                 break;
 
             case 2: // TARIK TUNAI
                 System.out.println("[STATE] Pindah ke Tarik Tunai");
-                // TODO: Aktifkan jika Faridha sudah buat StateTarikTunai
                 // atm.ubahState(new StateTarikTunai());
                 // frame.gantiLayar("TARIK");
                 break;
 
             case 3: // SETOR TUNAI
                 System.out.println("[STATE] Pindah ke Setor Tunai");
-                // TODO: Aktifkan jika Suci sudah buat StateSetorTunai
-                // atm.ubahState(new StateSetorTunai());
-                // frame.gantiLayar("SETOR");
+                atm.ubahState(new StateSetorTunai());
+                ((StateSetorTunai) atm.getStateSaatIni()).prosesSetor(atm);
                 break;
 
             case 4: // TRANSFER
                 System.out.println("[STATE] Pindah ke Transfer");
-                // TODO: Aktifkan jika Suci sudah buat StateTransfer
-                // atm.ubahState(new StateTransfer());
-                // frame.gantiLayar("TRANSFER");
+                atm.ubahState(new StateTransfer());
+                ((StateTransfer) atm.getStateSaatIni()).prosesTransfer(atm);
                 break;
 
             case 5: // RIWAYAT TRANSAKSI

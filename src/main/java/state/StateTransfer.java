@@ -1,0 +1,59 @@
+package state;
+
+import javax.swing.JOptionPane;
+import service.ProxyAkun;
+import view.MainFrame;
+
+/**
+ * StateTransfer
+ * State untuk proses transfer antar rekening pada ATM
+ */
+public class StateTransfer implements StateATM {
+    @Override
+    public void masukkanKartu(MesinATM atm, String nomorKartu) {}
+
+    @Override
+    public void masukkanPin(MesinATM atm, String pin) {}
+
+    @Override
+    public void pilihMenu(MesinATM atm, int pilihan) {}
+
+    @Override
+    public void prosesJumlah(MesinATM atm, double jumlah) {}
+
+    @Override
+    public void keluar(MesinATM atm) {
+        atm.ubahState(new StateMenuUtama());
+    }
+
+    // Fitur utama: transfer
+    public StateTransfer() {}
+
+    // Jalankan proses transfer saat state diaktifkan
+    public void prosesTransfer(MesinATM atm) {
+        MainFrame gui = (MainFrame) atm.getJendelaUtama();
+        ProxyAkun proxy = (ProxyAkun) atm.getProxy();
+        String tujuan = JOptionPane.showInputDialog(gui, "Masukkan nomor rekening tujuan:");
+        if (tujuan == null || tujuan.isEmpty()) {
+            atm.ubahState(new StateMenuUtama());
+            return;
+        }
+        String input = JOptionPane.showInputDialog(gui, "Masukkan nominal transfer:");
+        if (input == null) {
+            atm.ubahState(new StateMenuUtama());
+            return;
+        }
+        try {
+            double nominal = Double.parseDouble(input);
+            if (nominal <= 0) {
+                JOptionPane.showMessageDialog(gui, "Nominal harus lebih dari 0.");
+            } else {
+                proxy.transfer(nominal, tujuan);
+                JOptionPane.showMessageDialog(gui, "Transfer berhasil!");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(gui, "Error: " + e.getMessage());
+        }
+        atm.ubahState(new StateMenuUtama());
+    }
+}
