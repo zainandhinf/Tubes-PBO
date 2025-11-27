@@ -1,5 +1,7 @@
 package service;
 
+import java.util.List;
+
 import model.Akun;
 
 /**
@@ -38,5 +40,10 @@ public class AkunAsli implements ITransaksi {
     public double cekSaldo() {
         // Mengembalikan saldo asli dari objek Akun
         return akun.getSaldo();
+    }
+
+    @Override
+    public List<String> getRiwayat() {
+        return akun.getHistoriTransaksi();
     }
 }

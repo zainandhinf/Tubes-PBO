@@ -18,37 +18,28 @@ public class StateCekPin implements StateATM {
      */
     @Override
     public void masukkanPin(MesinATM atm, String pin) {
-        // 1. Ambil Proxy dari ATM (Sekarang Proxy ada di ATM/Context)
-        // Kita melakukan casting karena atm.getProxy() mengembalikan tipe ITransaksi
         ProxyAkun proxy = (ProxyAkun) atm.getProxy(); 
         
-        // 2. Ambil Database untuk mencari akun (Simulasi kartu dimasukkan)
-        // Dalam simulasi ini, kita menganggap kartu "123456" yang dimasukkan secara otomatis.
         String nomorKartuTest = atm.getNomorKartuSementara(); 
         Akun akunTarget = atm.getBankDatabase().getAkun(nomorKartuTest);
 
-        // Validasi awal: Cek apakah nomor rekening ada di Database
         if (akunTarget == null) {
             JOptionPane.showMessageDialog(null, "Kartu tidak dikenali (Akun tidak ditemukan di Database)!", "Error Kartu", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
-            // 3. Coba Login ke Proxy (Security Layer)
-            // Jika PIN salah, method ini akan melempar GagalLoginException
             proxy.login(akunTarget, pin);
             
-            // 4. Jika Sukses (Tidak ada Exception):
             JOptionPane.showMessageDialog(null, "Login Berhasil! Selamat Datang.");
             
-            atm.ubahState(new StateMenuUtama());  // Pindah Logic
+            atm.ubahState(new StateMenuUtama());  
             if (atm.getJendelaUtama() instanceof view.MainFrame) {
-                ((view.MainFrame) atm.getJendelaUtama()).gantiLayar("MENU"); // Pindah GUI
+                ((view.MainFrame) atm.getJendelaUtama()).gantiLayar("MENU"); 
             } 
             System.out.println("[STATE] Transisi ke StateMenuUtama..."); 
             
         } catch (Exception e) {
-            // Tangkap error dari Proxy (PIN Salah)
             JOptionPane.showMessageDialog(null, "Login Gagal: " + e.getMessage(), "Akses Ditolak", JOptionPane.WARNING_MESSAGE);
         }
     }

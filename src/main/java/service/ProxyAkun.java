@@ -1,5 +1,8 @@
 package service;
 
+import java.util.Collections;
+import java.util.List;
+
 import exception.GagalLoginException;
 import model.Akun;
 
@@ -74,5 +77,13 @@ public class ProxyAkun implements ITransaksi {
             return akunAsli.cekSaldo();
         }
         return 0;
+    }
+
+    @Override
+    public List<String> getRiwayat() {
+        if (isLogin) {
+            return akunAsli.getRiwayat();
+        }
+        return Collections.emptyList();
     }
 }

@@ -27,7 +27,6 @@ public class BankDatabase {
 
     private Properties config = new Properties();
 
-    // Simpan kredensial di variabel agar mudah diakses
     private String dbUrl;
     private String dbUser;
     private String dbPass;
@@ -130,12 +129,10 @@ public class BankDatabase {
                 String jenis = rs.getString("jenis_transaksi");
                 double nominal = rs.getDouble("nominal");
                 String ket = rs.getString("keterangan");
-                String waktu = rs.getString("waktu"); // Timestamp jadi String
+                String waktu = rs.getString("waktu");
                 
-                // Format: [2023-11-20 10:00] TARIK TUNAI - Rp 50.000 (ATM Kampus)
                 String log = String.format("[%s] %s - Rp %,.0f (%s)", waktu, jenis, nominal, ket);
                 
-                // Masukkan ke List di Memory (Tanpa simpan balik ke DB)
                 akun.tambahHistoriInternal(log);
             }
         } catch (SQLException e) {

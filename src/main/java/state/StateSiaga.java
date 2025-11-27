@@ -2,7 +2,7 @@ package state;
 
 import javax.swing.JOptionPane;
 
-import view.MainFrame; // Menggunakan MainFrame
+import view.MainFrame;
 
 /**
  * Kelas StateSiaga (Concrete State)
@@ -17,19 +17,15 @@ public class StateSiaga implements StateATM {
         
         if (atm.getBankDatabase().isAkunExist(nomorKartu)) {
             
-            // Jika Ada: Simpan nomor kartu di memori Mesin
             atm.setNomorKartuSementara(nomorKartu);
             
-            // Pindah State
             atm.ubahState(new StateCekPin());
             
-            // Ganti Layar
             if (atm.getJendelaUtama() instanceof MainFrame) {
                 ((MainFrame) atm.getJendelaUtama()).gantiLayar("LOGIN");
             }
             
         } else {
-            // Jika Tidak Ada: Tampilkan Error dan JANGAN pindah layar
             JOptionPane.showMessageDialog(null, 
                 "Kartu tidak dikenali! Silakan coba nomor lain.", 
                 "Error Kartu", 

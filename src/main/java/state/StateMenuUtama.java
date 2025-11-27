@@ -47,9 +47,8 @@ public class StateMenuUtama implements StateATM {
 
             case 5: // RIWAYAT TRANSAKSI
                 System.out.println("[STATE] Pindah ke Riwayat");
-                // TODO: Aktifkan jika Anda sudah buat StateRiwayat
-                // atm.ubahState(new StateRiwayat());
-                // frame.gantiLayar("RIWAYAT");
+                atm.ubahState(new StateRiwayat());
+                frame.gantiLayar("RIWAYAT");
                 break;
 
             case 6: // KELUAR (LOGOUT)
@@ -67,14 +66,11 @@ public class StateMenuUtama implements StateATM {
             "Apakah Anda yakin ingin keluar?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
-            // 1. Proses Logout di Proxy (Security)
             ProxyAkun proxy = (ProxyAkun) atm.getProxy();
             proxy.logout();
 
-            // 2. Reset State ke Awal
             atm.ubahState(new StateSiaga());
 
-            // 3. Ganti Layar ke Welcome
             MainFrame frame = (MainFrame) atm.getJendelaUtama();
             frame.gantiLayar("WELCOME");
             

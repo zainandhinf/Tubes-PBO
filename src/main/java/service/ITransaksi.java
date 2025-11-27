@@ -1,5 +1,7 @@
 package service;
 
+import java.util.List;
+
 /**
  * Interface ITransaksi
  * Merupakan "Kontrak Bisnis" yang mendefinisikan operasi apa saja 
@@ -35,4 +37,10 @@ public interface ITransaksi {
      * @return double jumlah saldo.
      */
     double cekSaldo();
+
+    /**
+     * Mengambil daftar riwayat transaksi.
+     * @return List String berisi log transaksi.
+     */
+    List<String> getRiwayat();
 }
