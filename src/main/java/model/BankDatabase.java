@@ -170,4 +170,53 @@ public class BankDatabase {
     public boolean isAkunExist(String noRek) {
         return accounts.containsKey(noRek);
     }
+
+    /**
+     * Update saldo di memory dan (jika mode SQL) di database.
+     */
+    public void updateSaldo(Akun akun) {
+        if (akun == null) return;
+        // Update cache
+        accounts.put(akun.getNoRek(), akun);
+
+        String mode = config.getProperty("app.mode", "MEMORY");
+        if (mode.equalsIgnoreCase("SQL")) {
+            String sql = "UPDATE akun SET saldo = ? WHERE no_rek = ?";
+            try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setDouble(1, akun.getSaldo());
+                pstmt.setString(2, akun.getNoRek());
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println("[WARN] Gagal update saldo ke DB untuk " + akun.getNoRek() + " : " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Tambah catatan transaksi ke tabel transaksi (jika mode SQL) dan ke histori internal akun.
+     */
+    public void tambahTransaksi(String noRek, String jenis, double nominal, String keterangan) {
+        Akun akun = accounts.get(noRek);
+        String waktu = java.time.LocalDateTime.now().toString();
+        String log = String.format("[%s] %s - Rp %,.0f (%s)", waktu, jenis, nominal, keterangan == null ? "" : keterangan);
+
+        // Tambah ke histori internal jika akun ada di cache
+        if (akun != null) {
+            akun.tambahHistoriInternal(log);
+        }
+
+        String mode = config.getProperty("app.mode", "MEMORY");
+        if (mode.equalsIgnoreCase("SQL")) {
+            String sql = "INSERT INTO transaksi (no_rek, jenis_transaksi, nominal, keterangan) VALUES (?, ?, ?, ?)";
+            try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, noRek);
+                pstmt.setString(2, jenis);
+                pstmt.setDouble(3, nominal);
+                pstmt.setString(4, keterangan);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println("[WARN] Gagal insert transaksi ke DB untuk " + noRek + " : " + e.getMessage());
+            }
+        }
+    }
 }

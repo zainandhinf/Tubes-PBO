@@ -23,8 +23,17 @@ public class AkunAsli implements ITransaksi {
 
     @Override
     public void tarikTunai(double jumlah) throws Exception {
-        // TODO: (Tugas Faridha) Implementasi logika pengurangan saldo di sini
-        // Contoh: if (saldo < jumlah) throw new SaldoKurangException...
+        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
+        if (akun.getSaldo() < jumlah) throw new Exception("Saldo tidak cukup");
+
+        double saldoLama = akun.getSaldo();
+        akun.setSaldo(saldoLama - jumlah);
+        akun.tambahHistoriInternal(String.format("Tarik tunai Rp %,.0f", jumlah));
+
+        // Persist perubahan ke BankDatabase
+        BankDatabase db = BankDatabase.getInstance();
+        db.updateSaldo(akun);
+        db.tambahTransaksi(akun.getNoRek(), "TARIK TUNAI", jumlah, "ATM");
     }
 
     @Override
@@ -33,6 +42,10 @@ public class AkunAsli implements ITransaksi {
         double saldoLama = akun.getSaldo();
         akun.setSaldo(saldoLama + jumlah);
         akun.tambahHistoriInternal(String.format("Setor tunai Rp %,.0f", jumlah));
+        // Persist perubahan
+        BankDatabase db = BankDatabase.getInstance();
+        db.updateSaldo(akun);
+        db.tambahTransaksi(akun.getNoRek(), "SETOR TUNAI", jumlah, "ATM");
     }
 
     @Override
@@ -47,6 +60,11 @@ public class AkunAsli implements ITransaksi {
         akunTujuan.setSaldo(akunTujuan.getSaldo() + jumlah);
         akun.tambahHistoriInternal(String.format("Transfer ke %s Rp %,.0f", tujuan, jumlah));
         akunTujuan.tambahHistoriInternal(String.format("Transfer dari %s Rp %,.0f", akun.getNoRek(), jumlah));
+        // Persist perubahan untuk kedua akun dan catat transaksi
+        db.updateSaldo(akun);
+        db.updateSaldo(akunTujuan);
+        db.tambahTransaksi(akun.getNoRek(), "TRANSFER KELUAR", jumlah, "Ke " + tujuan);
+        db.tambahTransaksi(akunTujuan.getNoRek(), "TRANSFER MASUK", jumlah, "Dari " + akun.getNoRek());
     }
 
     @Override

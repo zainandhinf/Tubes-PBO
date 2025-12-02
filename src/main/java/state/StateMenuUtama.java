@@ -17,15 +17,25 @@ public class StateMenuUtama implements StateATM {
 
         switch (pilihan) {
             case 1: // CEK SALDO
-                System.out.println("[STATE] Pindah ke Cek Saldo");
-                // atm.ubahState(new StateCekSaldo());
-                // frame.gantiLayar("SALDO");
+                System.out.println("[STATE] Cek Saldo diminta");
+                try {
+                    double saldo = atm.getProxy().cekSaldo();
+                    // Tampilkan ke user dalam format mata uang sederhana
+                    javax.swing.JOptionPane.showMessageDialog(frame,
+                            String.format("Saldo Anda: Rp %,.0f", saldo),
+                            "Cek Saldo", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    javax.swing.JOptionPane.showMessageDialog(frame,
+                            "Gagal mengambil saldo: " + ex.getMessage(),
+                            "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+                // Tetap di menu utama setelah menampilkan saldo
                 break;
 
             case 2: // TARIK TUNAI
                 System.out.println("[STATE] Pindah ke Tarik Tunai");
-                // atm.ubahState(new StateTarikTunai());
-                // frame.gantiLayar("TARIK");
+                atm.ubahState(new StateTarikTunai());
+                ((StateTarikTunai) atm.getStateSaatIni()).prosesTarik(atm);
                 break;
 
             case 3: // SETOR TUNAI
