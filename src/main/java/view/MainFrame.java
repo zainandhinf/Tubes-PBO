@@ -25,6 +25,9 @@ public class MainFrame extends JFrame {
     
     // Transfer view components
     private ViewTransfer transferView;
+    
+    // Setor tunai view components
+    private ViewSetorTunai setorTunaiView;
 
     public MainFrame(MesinATM mesin) {
         this.mesin = mesin;
@@ -61,6 +64,9 @@ public class MainFrame extends JFrame {
         
         transferView = new ViewTransfer(mesin);
         screenContainer.add(transferView, "TRANSFER");
+        
+        setorTunaiView = new ViewSetorTunai(mesin);
+        screenContainer.add(setorTunaiView, "SETOR_TUNAI");
 
         screenBezel.add(screenContainer, BorderLayout.CENTER);
 
@@ -166,6 +172,8 @@ public class MainFrame extends JFrame {
             }
         } else if (namaLayar.equals("TRANSFER")) {
             transferView.resetForm();
+        } else if (namaLayar.equals("SETOR_TUNAI")) {
+            setorTunaiView.resetForm();
         }
 
         updateActiveView();
@@ -187,6 +195,8 @@ public class MainFrame extends JFrame {
             }
         } else if (mesin.getStateSaatIni() instanceof StateTransfer) {
             transferView.handleInput(input);
+        } else if (mesin.getStateSaatIni() instanceof state.StateSetorTunai) {
+            setorTunaiView.handleInput(input);
         }
 
         currentInputBuffer = "";
@@ -204,6 +214,8 @@ public class MainFrame extends JFrame {
                     ((ViewMenu) comp).updateMenuInput(currentInputBuffer);
                 } else if (comp instanceof ViewTransfer) {
                     ((ViewTransfer) comp).updateInput(currentInputBuffer);
+                } else if (comp instanceof ViewSetorTunai) {
+                    ((ViewSetorTunai) comp).updateInput(currentInputBuffer);
                 }
                 // Nanti tambahkan: else if (comp instanceof WithdrawView) ...
             }
@@ -229,6 +241,9 @@ public class MainFrame extends JFrame {
             mesin.ubahState(new state.StateMenuUtama());
             gantiLayar("MENU");
         } else if (currentState instanceof StateTransfer) {
+            mesin.ubahState(new state.StateMenuUtama());
+            gantiLayar("MENU");
+        } else if (currentState instanceof state.StateSetorTunai) {
             mesin.ubahState(new state.StateMenuUtama());
             gantiLayar("MENU");
         }
