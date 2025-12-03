@@ -28,34 +28,4 @@ public class StateTransfer implements StateATM {
 
     // Fitur utama: transfer
     public StateTransfer() {}
-
-    // Jalankan proses transfer saat state diaktifkan
-    public void prosesTransfer(MesinATM atm) {
-        MainFrame gui = (MainFrame) atm.getJendelaUtama();
-        ProxyAkun proxy = (ProxyAkun) atm.getProxy();
-        String tujuan = JOptionPane.showInputDialog(gui, "Masukkan nomor rekening tujuan:");
-        if (tujuan == null || tujuan.isEmpty()) {
-            atm.ubahState(new StateMenuUtama());
-            return;
-        }
-        String input = JOptionPane.showInputDialog(gui, "Masukkan nominal transfer:");
-        if (input == null) {
-            atm.ubahState(new StateMenuUtama());
-            return;
-        }
-        try {
-            // Hilangkan titik ribuan agar input seperti 100.000 dibaca 100000
-            String cleanInput = input.replace(".", "").replace(",", "");
-            double nominal = Double.parseDouble(cleanInput);
-            if (nominal <= 0) {
-                JOptionPane.showMessageDialog(gui, "Nominal harus lebih dari 0.");
-            } else {
-                proxy.transfer(nominal, tujuan);
-                JOptionPane.showMessageDialog(gui, "Transfer berhasil!");
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(gui, "Error: " + e.getMessage());
-        }
-        atm.ubahState(new StateMenuUtama());
-    }
 }

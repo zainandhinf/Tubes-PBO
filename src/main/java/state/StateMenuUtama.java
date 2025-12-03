@@ -47,7 +47,7 @@ public class StateMenuUtama implements StateATM {
             case 4: // TRANSFER
                 System.out.println("[STATE] Pindah ke Transfer");
                 atm.ubahState(new StateTransfer());
-                ((StateTransfer) atm.getStateSaatIni()).prosesTransfer(atm);
+                frame.gantiLayar("TRANSFER");
                 break;
 
             case 5: // RIWAYAT TRANSAKSI

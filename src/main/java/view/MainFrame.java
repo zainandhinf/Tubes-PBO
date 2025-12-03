@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 import state.MesinATM;
+import state.StateTransfer;
 
 /**
  * Kelas MainFrame
@@ -21,6 +22,9 @@ public class MainFrame extends JFrame {
 
     // Variabel Penyimpan Ketikan (Pengganti InputField Kanan)
     private String currentInputBuffer = "";
+    
+    // Transfer view components
+    private ViewTransfer transferView;
 
     public MainFrame(MesinATM mesin) {
         this.mesin = mesin;
@@ -54,6 +58,9 @@ public class MainFrame extends JFrame {
         screenContainer.add(new LoginView(mesin), "LOGIN");
         screenContainer.add(new ViewMenu(mesin), "MENU");
         screenContainer.add(new ViewRiwayat(mesin), "RIWAYAT");
+        
+        transferView = new ViewTransfer(mesin);
+        screenContainer.add(transferView, "TRANSFER");
 
         screenBezel.add(screenContainer, BorderLayout.CENTER);
 
@@ -157,6 +164,8 @@ public class MainFrame extends JFrame {
                     }
                 }
             }
+        } else if (namaLayar.equals("TRANSFER")) {
+            transferView.resetForm();
         }
 
         updateActiveView();
@@ -176,6 +185,8 @@ public class MainFrame extends JFrame {
                 mesin.pilihMenu(pilihan);
             } catch (NumberFormatException e) {
             }
+        } else if (mesin.getStateSaatIni() instanceof StateTransfer) {
+            transferView.handleInput(input);
         }
 
         currentInputBuffer = "";
@@ -191,6 +202,8 @@ public class MainFrame extends JFrame {
                     ((LoginView) comp).updatePinDisplay(currentInputBuffer);
                 } else if (comp instanceof ViewMenu) {
                     ((ViewMenu) comp).updateMenuInput(currentInputBuffer);
+                } else if (comp instanceof ViewTransfer) {
+                    ((ViewTransfer) comp).updateInput(currentInputBuffer);
                 }
                 // Nanti tambahkan: else if (comp instanceof WithdrawView) ...
             }
@@ -215,7 +228,9 @@ public class MainFrame extends JFrame {
         if (currentState instanceof state.StateRiwayat) {
             mesin.ubahState(new state.StateMenuUtama());
             gantiLayar("MENU");
-
+        } else if (currentState instanceof StateTransfer) {
+            mesin.ubahState(new state.StateMenuUtama());
+            gantiLayar("MENU");
         }
 
         // if (currentState instanceof state.StateRiwayat) {
