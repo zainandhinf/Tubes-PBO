@@ -7,54 +7,54 @@ import view.MainFrame;
 public class StateTarikTunai implements StateATM {
 
     @Override
-    public void masukkanKartu(MesinATM atm, String nomorKartu) {}
+    public void masukkanKartu(MesinATM atm, String nomorKartu) {
+        // Tidak digunakan di state ini
+    }
 
     @Override
-    public void masukkanPin(MesinATM atm, String pin) {}
+    public void masukkanPin(MesinATM atm, String pin) {
+        // Tidak digunakan di state ini
+    }
 
     @Override
-    public void pilihMenu(MesinATM atm, int pilihan) {}
+    public void pilihMenu(MesinATM atm, int pilihan) {
+        // Tidak digunakan di state ini
+    }
 
     @Override
-    public void prosesJumlah(MesinATM atm, double jumlah) {}
+    public void prosesJumlah(MesinATM atm, double jumlah) {
+        MainFrame gui = (MainFrame) atm.getJendelaUtama();
+        ProxyAkun proxy = (ProxyAkun) atm.getProxy();
+
+        try {
+            if (jumlah <= 0) {
+                JOptionPane.showMessageDialog(gui, "Nominal harus lebih dari 0.");
+            } else {
+                proxy.tarikTunai(jumlah);
+                JOptionPane.showMessageDialog(gui, "Tarik tunai berhasil!");
+                atm.ubahState(new StateMenuUtama());
+                gui.gantiLayar("MENU");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(gui, "Error: " + e.getMessage());
+            // Tetap di layar tarik tunai atau kembali?
+            // Untuk UX yang baik, biarkan user mencoba lagi atau cancel
+        }
+    }
 
     @Override
     public void keluar(MesinATM atm) {
         atm.ubahState(new StateMenuUtama());
+        MainFrame gui = (MainFrame) atm.getJendelaUtama();
+        gui.gantiLayar("MENU");
     }
 
-    public StateTarikTunai() {}
+    public StateTarikTunai() {
+        // Konstruktor kosong
+    }
 
-    // === PROSES UTAMA TARIK TUNAI ===
+    // Method prosesTarik lama dihapus karena digantikan oleh GUI Flow
     public void prosesTarik(MesinATM atm) {
-        MainFrame gui = (MainFrame) atm.getJendelaUtama();
-        ProxyAkun proxy = (ProxyAkun) atm.getProxy();
-
-        String input = JOptionPane.showInputDialog(gui, "Masukkan nominal tarik tunai:");
-
-        // User menekan Cancel / close input box
-        if (input == null) {
-            atm.ubahState(new StateMenuUtama());
-            return;
-        }
-
-        try {
-            // Menghapus titik ribuan agar input seperti "100.000" dapat terbaca
-            String cleanInput = input.replace(".", "").replace(",", "");
-            double nominal = Double.parseDouble(cleanInput);
-
-            if (nominal <= 0) {
-                JOptionPane.showMessageDialog(gui, "Nominal harus lebih dari 0.");
-            } else {
-                proxy.tarikTunai(nominal);
-                JOptionPane.showMessageDialog(gui, "Tarik tunai berhasil!");
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(gui, "Error: " + e.getMessage());
-        }
-
-        // Kembali ke menu utama setelah transaksi
-        atm.ubahState(new StateMenuUtama());
+        // Deprecated
     }
 }

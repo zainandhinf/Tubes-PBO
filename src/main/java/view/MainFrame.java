@@ -60,6 +60,8 @@ public class MainFrame extends JFrame {
         screenContainer.add(new WelcomeView(mesin), "WELCOME");
         screenContainer.add(new LoginView(mesin), "LOGIN");
         screenContainer.add(new ViewMenu(mesin), "MENU");
+        screenContainer.add(new ViewCekSaldo(mesin), "CEK_SALDO");
+        screenContainer.add(new ViewTarikTunai(mesin), "TARIK_TUNAI");
         screenContainer.add(new ViewRiwayat(mesin), "RIWAYAT");
         
         transferView = new ViewTransfer(mesin);
@@ -170,6 +172,24 @@ public class MainFrame extends JFrame {
                     }
                 }
             }
+        } else if (namaLayar.equals("CEK_SALDO")) {
+            for (Component comp : screenContainer.getComponents()) {
+                if (comp instanceof ViewCekSaldo) {
+                    try {
+                        double saldo = mesin.getProxy().cekSaldo();
+                        ((ViewCekSaldo) comp).updateSaldo(saldo);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else if (namaLayar.equals("TARIK_TUNAI")) {
+            // Reset input field saat masuk layar tarik tunai
+            for (Component comp : screenContainer.getComponents()) {
+                if (comp instanceof ViewTarikTunai) {
+                    ((ViewTarikTunai) comp).updateInput("");
+                }
+            }
         } else if (namaLayar.equals("TRANSFER")) {
             transferView.resetForm();
         } else if (namaLayar.equals("SETOR_TUNAI")) {
@@ -193,6 +213,14 @@ public class MainFrame extends JFrame {
                 mesin.pilihMenu(pilihan);
             } catch (NumberFormatException e) {
             }
+        } else if (mesin.getStateSaatIni() instanceof state.StateTarikTunai) {
+            try {
+                // Hapus titik/koma jika ada
+                double nominal = Double.parseDouble(input.replace(".", "").replace(",", ""));
+                mesin.prosesJumlah(nominal);
+            } catch (NumberFormatException e) {
+                System.out.println("[ERROR] Input nominal tidak valid: " + input);
+            }
         } else if (mesin.getStateSaatIni() instanceof StateTransfer) {
             transferView.handleInput(input);
         } else if (mesin.getStateSaatIni() instanceof state.StateSetorTunai) {
@@ -212,6 +240,8 @@ public class MainFrame extends JFrame {
                     ((LoginView) comp).updatePinDisplay(currentInputBuffer);
                 } else if (comp instanceof ViewMenu) {
                     ((ViewMenu) comp).updateMenuInput(currentInputBuffer);
+                } else if (comp instanceof ViewTarikTunai) {
+                    ((ViewTarikTunai) comp).updateInput(currentInputBuffer);
                 } else if (comp instanceof ViewTransfer) {
                     ((ViewTransfer) comp).updateInput(currentInputBuffer);
                 } else if (comp instanceof ViewSetorTunai) {
@@ -246,34 +276,27 @@ public class MainFrame extends JFrame {
         } else if (currentState instanceof state.StateSetorTunai) {
             mesin.ubahState(new state.StateMenuUtama());
             gantiLayar("MENU");
+        } else if (currentState instanceof state.StateCekSaldo) {
+            // Jika di Layar Cek Saldo -> Kembali ke Menu Utama
+            mesin.ubahState(new state.StateMenuUtama());
+            gantiLayar("MENU");
+
+        } else if (currentState instanceof state.StateTarikTunai ||
+                currentState instanceof state.StateSetorTunai ||
+                currentState instanceof state.StateTransfer) {
+            // Jika sedang Input Nominal Transaksi -> Batal & Kembali ke Menu Utama
+            mesin.ubahState(new state.StateMenuUtama());
+            gantiLayar("MENU");
+
+        } else if (currentState instanceof state.StateCekPin) {
+            // Jika sedang Input PIN -> Batal Login (Kembali ke Welcome)
+            mesin.ubahState(new state.StateSiaga());
+            gantiLayar("WELCOME");
+
+        } else if (currentState instanceof state.StateMenuUtama) {
+            // Jika di Menu Utama -> Sama dengan tombol Exit/Keluar
+            mesin.keluar();
         }
-
-        // if (currentState instanceof state.StateRiwayat) {
-        //     // Jika di Layar Riwayat -> Kembali ke Menu Utama
-        //     mesin.ubahState(new state.StateMenuUtama());
-        //     gantiLayar("MENU");
-
-        // } else if (currentState instanceof state.StateCekSaldo) {
-        //     // Jika di Layar Cek Saldo -> Kembali ke Menu Utama
-        //     mesin.ubahState(new state.StateMenuUtama());
-        //     gantiLayar("MENU");
-
-        // } else if (currentState instanceof state.StateTarikTunai ||
-        //         currentState instanceof state.StateSetorTunai ||
-        //         currentState instanceof state.StateTransfer) {
-        //     // Jika sedang Input Nominal Transaksi -> Batal & Kembali ke Menu Utama
-        //     mesin.ubahState(new state.StateMenuUtama());
-        //     gantiLayar("MENU");
-
-        // } else if (currentState instanceof state.StateCekPin) {
-        //     // Jika sedang Input PIN -> Batal Login (Kembali ke Welcome)
-        //     mesin.ubahState(new state.StateSiaga());
-        //     gantiLayar("WELCOME");
-
-        // } else if (currentState instanceof state.StateMenuUtama) {
-        //     // Jika di Menu Utama -> Sama dengan tombol Exit/Keluar
-        //     mesin.keluar();
-        // }
 
         // Jika di StateSiaga (Welcome), Cancel hanya menghapus input (sudah dilakukan
         // di langkah 1)
