@@ -1,19 +1,26 @@
 package view;
 
 import javax.swing.*;
-import java.awt.*;
+
 import state.MesinATM;
+
+import java.awt.*;
+import util.UIConstants;
+
 
 /**
  * Kelas WelcomeView
  * Panel GUI yang muncul saat StateSiaga (Layar Awal).
  * Menampilkan pesan selamat datang dan kolom input nomor kartu (Read Only).
- */
+*/
 public class WelcomeView extends JPanel {
+    @SuppressWarnings("unused")
+    private transient MesinATM mesin;
     
     private JTextField cardField; // Field Tampilan Input
 
     public WelcomeView(MesinATM mesin) {
+        this.mesin = mesin;
         setLayout(new BorderLayout());
         setBackground(new Color(25, 30, 40)); 
 
@@ -22,11 +29,11 @@ public class WelcomeView extends JPanel {
         centerPanel.setBackground(new Color(25, 30, 40));
         
         JLabel lblWelcome = new JLabel("SELAMAT DATANG", SwingConstants.CENTER);
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 28));
+        lblWelcome.setFont(new Font(UIConstants.FONT_ARIAL, Font.BOLD, 28));
         lblWelcome.setForeground(Color.WHITE);
         
         JLabel lblBank = new JLabel("DI BANK POLBAN", SwingConstants.CENTER);
-        lblBank.setFont(new Font("Arial", Font.BOLD, 22));
+        lblBank.setFont(new Font(UIConstants.FONT_ARIAL, Font.BOLD, 22));
         lblBank.setForeground(new Color(0, 200, 255));
 
         centerPanel.add(lblWelcome);
@@ -38,14 +45,14 @@ public class WelcomeView extends JPanel {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 50, 50));
 
         JLabel lblInstruksi = new JLabel("Masukkan Nomor Kartu:", SwingConstants.CENTER);
-        lblInstruksi.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblInstruksi.setFont(new Font(UIConstants.FONT_ARIAL, Font.PLAIN, 14));
         lblInstruksi.setForeground(Color.GRAY);
         lblInstruksi.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         // Field Tampilan (Read Only - Diupdate dari MainFrame)
         cardField = new JTextField();
-        cardField.setFont(new Font("Monospaced", Font.BOLD, 24));
-        cardField.setHorizontalAlignment(JTextField.CENTER);
+        cardField.setFont(new Font(UIConstants.FONT_MONO, Font.BOLD, 24));
+        cardField.setHorizontalAlignment(SwingConstants.CENTER);
         cardField.setEditable(false); 
         cardField.setBackground(new Color(40, 45, 55));
         cardField.setForeground(new Color(0, 255, 150)); // Warna Hijau Neon

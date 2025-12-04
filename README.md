@@ -18,7 +18,7 @@
 ## 🏗 Arsitektur & Design Pattern
 Proyek ini dibangun di atas pondasi OOP yang kuat:
 
-| Pattern | Implementasi | Fungsi |
+| Pattern | Implementasi | Fungsi | 
 | :--- | :--- | :--- |
 | **Singleton** | `BankDatabase` | Menjamin hanya ada satu koneksi database yang aktif. |
 | **Proxy** | `ProxyAkun` | Mencegat akses ke `AkunAsli`. Memastikan user sudah login sebelum transaksi. |

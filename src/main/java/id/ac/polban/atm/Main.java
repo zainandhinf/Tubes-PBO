@@ -1,7 +1,9 @@
+package id.ac.polban.atm;
+
 import javax.swing.SwingUtilities;
 import state.MesinATM;
 import state.StateSiaga;
-import view.MainFrame; // Menggunakan MainFrame
+import view.MainFrame;
 
 /**
  * Kelas Main

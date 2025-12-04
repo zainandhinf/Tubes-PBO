@@ -3,6 +3,7 @@ package state;
 import javax.swing.JOptionPane;
 import model.Akun;
 import service.ProxyAkun;
+import java.util.logging.Logger;
 
 /**
  * Kelas StateCekPin (Concrete State)
@@ -10,6 +11,7 @@ import service.ProxyAkun;
  * Bertugas menghubungkan TampilanLogin (View) dengan ProxyAkun (Security).
  */
 public class StateCekPin implements StateATM {
+    private static final Logger LOGGER = Logger.getLogger(StateCekPin.class.getName());
 
     /**
      * Method utama yang dijalankan saat user menekan tombol ENTER di layar Login.
@@ -34,10 +36,10 @@ public class StateCekPin implements StateATM {
             JOptionPane.showMessageDialog(null, "Login Berhasil! Selamat Datang.");
             
             atm.ubahState(new StateMenuUtama());  
-            if (atm.getJendelaUtama() instanceof view.MainFrame) {
-                ((view.MainFrame) atm.getJendelaUtama()).gantiLayar("MENU"); 
+            if (atm.getJendelaUtama() instanceof view.MainFrame mainframe) {
+                mainframe.gantiLayar("MENU");
             } 
-            System.out.println("[STATE] Transisi ke StateMenuUtama..."); 
+            LOGGER.info("[STATE] Transisi ke StateMenuUtama.");
             
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Login Gagal: " + e.getMessage(), "Akses Ditolak", JOptionPane.WARNING_MESSAGE);

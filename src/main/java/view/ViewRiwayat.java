@@ -1,15 +1,24 @@
 package view;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.List;
+
 import state.MesinATM;
 
+import java.awt.*;
+import java.util.List;
+
+/**
+ * Kelas ViewRiwayat
+ * Menampilkan layar riwayat transaksi.
+ */
 public class ViewRiwayat extends JPanel {
+    @SuppressWarnings("unused")
+    private transient MesinATM mesin;
     
     private JTextArea textInfo; // Area untuk menampilkan teks riwayat
 
     public ViewRiwayat(MesinATM mesin) {
+        this.mesin = mesin;
         setLayout(new BorderLayout());
         setBackground(new Color(25, 30, 40));
 

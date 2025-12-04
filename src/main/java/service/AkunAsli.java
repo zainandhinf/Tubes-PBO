@@ -1,6 +1,7 @@
 package service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import model.Akun;
 import model.BankDatabase;
@@ -22,9 +23,9 @@ public class AkunAsli implements ITransaksi {
     }
 
     @Override
-    public void tarikTunai(double jumlah) throws Exception {
-        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
-        if (akun.getSaldo() < jumlah) throw new Exception("Saldo tidak cukup");
+    public void tarikTunai(double jumlah) {
+        if (jumlah <= 0) throw new IllegalArgumentException("Nominal harus lebih dari 0");
+        if (akun.getSaldo() < jumlah) throw new IllegalStateException("Saldo tidak cukup");
 
         double saldoLama = akun.getSaldo();
         akun.setSaldo(saldoLama - jumlah);
@@ -37,8 +38,8 @@ public class AkunAsli implements ITransaksi {
     }
 
     @Override
-    public void setorTunai(double jumlah) throws Exception {
-        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
+    public void setorTunai(double jumlah) {
+        if (jumlah <= 0) throw new IllegalArgumentException("Nominal harus lebih dari 0");
         double saldoLama = akun.getSaldo();
         akun.setSaldo(saldoLama + jumlah);
         akun.tambahHistoriInternal(String.format("Setor tunai Rp %,.0f", jumlah));
@@ -49,13 +50,13 @@ public class AkunAsli implements ITransaksi {
     }
 
     @Override
-    public void transfer(double jumlah, String tujuan) throws Exception {
-        if (jumlah <= 0) throw new Exception("Nominal harus lebih dari 0");
-        if (akun.getSaldo() < jumlah) throw new Exception("Saldo tidak cukup");
-        if (akun.getNoRek().equals(tujuan)) throw new Exception("Tidak bisa transfer ke rekening sendiri");
+    public void transfer(double jumlah, String tujuan) {
+        if (jumlah <= 0) throw new IllegalArgumentException("Nominal harus lebih dari 0");
+        if (akun.getSaldo() < jumlah) throw new IllegalStateException("Saldo tidak cukup");
+        if (akun.getNoRek().equals(tujuan)) throw new IllegalArgumentException("Tidak bisa transfer ke rekening sendiri");
         BankDatabase db = BankDatabase.getInstance();
         Akun akunTujuan = db.getAkun(tujuan);
-        if (akunTujuan == null) throw new Exception("Rekening tujuan tidak ditemukan");
+        if (akunTujuan == null) throw new NoSuchElementException("Rekening tujuan tidak ditemukan");
         akun.setSaldo(akun.getSaldo() - jumlah);
         akunTujuan.setSaldo(akunTujuan.getSaldo() + jumlah);
         akun.tambahHistoriInternal(String.format("Transfer ke %s Rp %,.0f", tujuan, jumlah));

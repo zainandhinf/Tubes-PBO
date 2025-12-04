@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Kelas BankDatabase
@@ -17,6 +19,8 @@ import java.util.Properties;
  * Mendukung mode In-Memory (Dummy) dan Database Eksternal (PostgreSQL).
  */
 public class BankDatabase {
+
+    private static final Logger LOGGER = Logger.getLogger(BankDatabase.class.getName());
     
     // 1. SINGLETON PATTERN: Variabel static untuk menyimpan satu-satunya instance
     private static BankDatabase instance;
@@ -31,17 +35,21 @@ public class BankDatabase {
     private String dbUser;
     private String dbPass;
 
+    private static final String CONFIG_APP_MODE = "app.mode";
+    private static final String MODE_MEMORY = "MEMORY";
+    private static final String MODE_SQL = "SQL";
+
     // Constructor Private: Agar tidak bisa di-new sembarangan dari luar
     private BankDatabase() {
         loadConfig();
 
-        String mode = config.getProperty("app.mode", "MEMORY");
+        String mode = config.getProperty(CONFIG_APP_MODE, MODE_SQL);
         
         if (mode.equalsIgnoreCase("SQL")) {
-            System.out.println("[SYSTEM] Mode: DATABASE SQL (PostgreSQL)");
+            LOGGER.info("[SYSTEM] Mode: DATABASE SQL (PostgreSQL)");
             loadDataFromSQL(); 
         } else {
-            System.out.println("[SYSTEM] Mode: IN-MEMORY (Dummy Data)");
+            LOGGER.info("[SYSTEM] Mode: IN-MEMORY (Dummy Data)");
             loadDummyData();
         }        
     }
@@ -60,7 +68,7 @@ public class BankDatabase {
     private void loadConfig() {
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("database.properties")) {
             if (input == null) {
-                System.out.println("[ERROR] File database.properties tidak ditemukan!");
+                LOGGER.severe("[ERROR] File database.properties tidak ditemukan!");
                 return;
             }
             config.load(input);
@@ -73,54 +81,60 @@ public class BankDatabase {
     }
 
     // ---------------------------------------------------------
-    // KONEKSI & LOAD DATA (SQL)
-    // ---------------------------------------------------------
-    
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
-    }
+// KONEKSI & LOAD DATA (SQL)
+// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // KONEKSI KE POSTGRESQL
-    // ---------------------------------------------------------
-    private void loadDataFromSQL() {
-        System.out.println("[DATABASE] Menghubungkan ke PostgreSQL...");
+private Connection getConnection() throws SQLException {
+    return DriverManager.getConnection(dbUrl, dbUser, dbPass);
+}
 
-        try (Connection conn = getConnection()) {
-            if (conn != null) {
-                System.out.println("[DATABASE] Koneksi Sukses!");
-                
-                String sql = "SELECT * FROM akun";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql);
-                     ResultSet rs = pstmt.executeQuery()) {
-                    
-                    while (rs.next()) {
-                        String noRek = rs.getString("no_rek");
-                        String pin = rs.getString("pin");
-                        double saldo = rs.getDouble("saldo");
-                        String tipe = rs.getString("tipe_akun");
+// ---------------------------------------------------------
+// KONEKSI KE POSTGRESQL
+// ---------------------------------------------------------
+private void loadDataFromSQL() {
+    LOGGER.info(() -> "[DATABASE] Menghubungkan ke PostgreSQL...");
 
-                        Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
-                        
-                        // LOAD RIWAYAT TRANSAKSI UNTUK AKUN INI
-                        loadHistoriTransaksi(conn, akunBaru);
-                        
-                        tambahAkun(akunBaru);
-                    }
-                    System.out.println("[DATABASE] " + accounts.size() + " data nasabah & riwayat berhasil dimuat.");
-                }
+    try (Connection conn = getConnection()) {
+
+        LOGGER.info(() -> "[DATABASE] Koneksi Sukses!");
+
+        String sql = "SELECT no_rek, pin, saldo, tipe_akun FROM akun";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String noRek = rs.getString("no_rek");
+                String pin = rs.getString("pin");
+                double saldo = rs.getDouble("saldo");
+                String tipe = rs.getString("tipe_akun");
+
+                Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
+
+                // LOAD RIWAYAT TRANSAKSI UNTUK AKUN INI
+                loadHistoriTransaksi(conn, akunBaru);
+
+                tambahAkun(akunBaru);
             }
-        } catch (SQLException e) {
-            System.out.println("[ERROR] Gagal konek ke Database: " + e.getMessage());
-            loadDummyData(); // Fallback
+
+            LOGGER.info(() -> "[DATABASE] " + accounts.size() + 
+                              " data nasabah & riwayat berhasil dimuat.");
         }
+
+    } catch (SQLException e) {
+        LOGGER.log(Level.SEVERE, "[ERROR] Gagal konek ke Database!", e);
+        loadDummyData(); // fallback
     }
+}
+
 
     /**
      * Mengambil data dari tabel 'transaksi' dan memasukkannya ke List di object Akun
      */
     private void loadHistoriTransaksi(Connection conn, Akun akun) {
-        String sql = "SELECT * FROM transaksi WHERE no_rek = ? ORDER BY waktu DESC LIMIT 10";
+        String sql = "SELECT jenis_transaksi, nominal, keterangan, waktu "
+           + "FROM transaksi WHERE no_rek = ? "
+           + "ORDER BY waktu DESC LIMIT 10";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, akun.getNoRek());
             ResultSet rs = pstmt.executeQuery();
@@ -136,7 +150,7 @@ public class BankDatabase {
                 akun.tambahHistoriInternal(log);
             }
         } catch (SQLException e) {
-            System.out.println("[WARN] Gagal load histori untuk " + akun.getNoRek());
+            LOGGER.warning(() -> "[WARN] Gagal load histori untuk " + akun.getNoRek());
         }
     }
 
@@ -144,13 +158,13 @@ public class BankDatabase {
     // METHOD UNTUK DATA DUMMY (JCF Only)
     // ---------------------------------------------------------
     private void loadDummyData() {
-        System.out.println("[DATABASE] Loading data dummy ke memori...");
+        LOGGER.info("[DATABASE] Loading data dummy ke memori...");
         
         tambahAkun(new AkunTabungan("123456", "123456", 5000000, "Platinum")); 
         tambahAkun(new AkunTabungan("654321", "111111", 50000, "Silver"));   
         tambahAkun(new AkunTabungan("999999", "000000", 0, "Gold"));
         
-        System.out.println("[DATABASE] " + accounts.size() + " akun berhasil dimuat.");
+        LOGGER.info(() -> "[DATABASE] " + accounts.size() + " akun berhasil dimuat.");
     }
 
     // ---------------------------------------------------------
@@ -179,7 +193,7 @@ public class BankDatabase {
         // Update cache
         accounts.put(akun.getNoRek(), akun);
 
-        String mode = config.getProperty("app.mode", "MEMORY");
+        String mode = config.getProperty(CONFIG_APP_MODE, MODE_MEMORY);
         if (mode.equalsIgnoreCase("SQL")) {
             String sql = "UPDATE akun SET saldo = ? WHERE no_rek = ?";
             try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -187,7 +201,7 @@ public class BankDatabase {
                 pstmt.setString(2, akun.getNoRek());
                 pstmt.executeUpdate();
             } catch (SQLException e) {
-                System.out.println("[WARN] Gagal update saldo ke DB untuk " + akun.getNoRek() + " : " + e.getMessage());
+                LOGGER.warning(()-> "[WARN] Gagal update saldo ke DB untuk " + akun.getNoRek());
             }
         }
     }
@@ -205,7 +219,7 @@ public class BankDatabase {
             akun.tambahHistoriInternal(log);
         }
 
-        String mode = config.getProperty("app.mode", "MEMORY");
+        String mode = config.getProperty(CONFIG_APP_MODE, MODE_MEMORY);
         if (mode.equalsIgnoreCase("SQL")) {
             String sql = "INSERT INTO transaksi (no_rek, jenis_transaksi, nominal, keterangan) VALUES (?, ?, ?, ?)";
             try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -215,7 +229,10 @@ public class BankDatabase {
                 pstmt.setString(4, keterangan);
                 pstmt.executeUpdate();
             } catch (SQLException e) {
-                System.out.println("[WARN] Gagal insert transaksi ke DB untuk " + noRek + " : " + e.getMessage());
+                LOGGER.log(Level.WARNING, 
+                    String.format("[WARN] Gagal insert transaksi ke DB untuk %s", noRek), 
+                    e
+                );
             }
         }
     }

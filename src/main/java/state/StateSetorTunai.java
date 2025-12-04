@@ -1,32 +1,45 @@
 
 package state;
 
-import javax.swing.JOptionPane;
-import service.ProxyAkun;
-import view.MainFrame;
-
 /**
  * StateSetorTunai
  * State untuk proses setor tunai pada ATM
  */
 public class StateSetorTunai implements StateATM {
     @Override
-    public void masukkanKartu(MesinATM atm, String nomorKartu) {}
+    public void masukkanKartu(MesinATM atm, String nomorKartu) {
+        throw new UnsupportedOperationException(
+            "Tidak dapat memasukkan kartu pada mode setor tunai."
+        );
+    }
 
     @Override
-    public void masukkanPin(MesinATM atm, String pin) {}
+    public void masukkanPin(MesinATM atm, String pin) {
+        throw new UnsupportedOperationException(
+            "Tidak dapat memasukkan PIN pada mode setor tunai."
+        );
+    }
 
     @Override
-    public void pilihMenu(MesinATM atm, int pilihan) {}
+    public void pilihMenu(MesinATM atm, int pilihan) {
+        throw new UnsupportedOperationException(
+            "Tidak dapat memilih menu pada mode setor tunai."
+        );
+    }
 
     @Override
-    public void prosesJumlah(MesinATM atm, double jumlah) {}
+    public void prosesJumlah(MesinATM atm, double jumlah) {
+        throw new UnsupportedOperationException(
+            "Tidak dapat memproses jumlah di luar alur setor tunai."
+        );
+    }
 
     @Override
     public void keluar(MesinATM atm) {
         atm.ubahState(new StateMenuUtama());
     }
 
-    // Fitur utama: setor tunai
-    public StateSetorTunai() {}
+    public StateSetorTunai() {
+        // Konstruktor kosong memang diperlukan untuk inisialisasi state
+    }
 }
