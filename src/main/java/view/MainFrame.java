@@ -125,8 +125,9 @@ public class MainFrame extends JFrame {
             } else if (k.equals("<")) {
                 btn.setBackground(new Color(150, 50, 50));
                 btn.addActionListener(e -> {
-                    if (!currentInputBuffer.isEmpty()) {
-                        currentInputBuffer = currentInputBuffer.substring(0, currentInputBuffer.length() - 1);
+                    if (!inputBuffer.isEmpty()) { 
+                        inputBuffer.deleteCharAt(inputBuffer.length() - 1);
+                        currentInputBuffer = inputBuffer.toString();
                         updateActiveView();
                     }
                 });
