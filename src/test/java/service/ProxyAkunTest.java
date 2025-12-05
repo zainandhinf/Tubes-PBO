@@ -15,7 +15,7 @@ class ProxyAkunTest {
     @BeforeEach
     void setUp() {
         proxy = new ProxyAkun();
-        // Buat akun dummy untuk tes (tidak perlu ambil dari DB)
+        // Buat akun dummy untuk tes
         akunTest = new AkunTabungan("TestUser", "123456", 1000000, "Silver");
     }
 

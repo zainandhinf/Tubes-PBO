@@ -140,33 +140,18 @@ public class ViewTransfer extends JPanel {
                 statusLabel.setText("Status: Menunggu input nominal...");
                 statusLabel.setForeground(Color.ORANGE);
             } else {
-                if (input.trim().isEmpty()) {
-                    throw new Exception("Nominal tidak boleh kosong!");
-                }
+                double nominalValue = parseNominal(input); // Method helper baru (lihat bawah)
                 
-                // Parse nominal dengan support format ribuan
-                String cleanInput = input.replace(".", "").replace(",", "");
-                double nominalValue = Double.parseDouble(cleanInput);
-                
-                if (nominalValue <= 0) {
-                    throw new Exception("Nominal harus lebih besar dari 0");
-                }
-                
-                // Proses transfer
+                // Proses transfer (POTENSI ERROR DI SINI)
                 mesin.getProxy().transfer(nominalValue, rekeningTujuan);
                 
+                // Jika sukses:
+                JOptionPane.showMessageDialog(this, "Transfer Berhasil!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
                 statusLabel.setText("Status: Transfer berhasil!");
                 statusLabel.setForeground(Color.CYAN);
                 inputPromptLabel.setText("Transfer selesai. Tekan CANCEL untuk kembali ke menu.");
                 
-                // Kembali ke menu setelah 5 detik
-                Timer timer = new Timer(5000, e -> {
-                    mesin.ubahState(new state.StateMenuUtama());
-                    ((MainFrame) SwingUtilities.getWindowAncestor(this)).gantiLayar("MENU");
-                });
-                timer.setRepeats(false);
-                timer.start();
-                
+                kembaliKeMenu(); // Method helper baru
             }
         } catch (NumberFormatException e) {
             statusLabel.setText("Error: Nominal harus berupa angka yang valid!");
@@ -174,52 +159,26 @@ public class ViewTransfer extends JPanel {
         } catch (IllegalArgumentException e) {
             statusLabel.setText("Error: " + e.getMessage());
             statusLabel.setForeground(Color.RED);
-        } catch (Exception e) {
-            statusLabel.setText("Error: " + e.getMessage());
+        } catch (SaldoKurangException e) { // TANGKAP INI
+            statusLabel.setText("Error: Saldo Anda tidak mencukupi!");
             statusLabel.setForeground(Color.RED);
-        }
-    }
-
-
-    private void performTransfer(double nominalValue) {
-        try {
-            mesin.getProxy().transfer(nominalValue, rekeningTujuan);
-            JOptionPane.showMessageDialog(this, "Transfer berhasil!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-            statusLabel.setText("Status: Transfer berhasil!");
-            statusLabel.setForeground(Color.CYAN);
-            inputPromptLabel.setText("Transfer selesai. Tekan CANCEL untuk kembali ke menu.");
-            kembaliKeMenu();
-        } catch (InputTidakValidException e) {
-            statusLabel.setText("Error: " + e.getMessage());
-            statusLabel.setForeground(Color.RED);
-        } catch (SaldoKurangException e) {
-            statusLabel.setText("Error: Saldo tidak cukup!");
-            statusLabel.setForeground(Color.RED);
-        } catch (RekeningTidakDitemukanException e) {
+        } catch (RekeningTidakDitemukanException e) { // TANGKAP INI
             statusLabel.setText("Error: Rekening tujuan tidak ditemukan!");
             statusLabel.setForeground(Color.RED);
-        } catch (GagalLoginException e) {
-            statusLabel.setText("Error: Anda belum login!");
+        } catch (GagalLoginException e) { // TANGKAP INI
+            statusLabel.setText("Error: Sesi habis, silakan login ulang.");
             statusLabel.setForeground(Color.RED);
+        } catch (InputTidakValidException e) { // TANGKAP INI
+            statusLabel.setText("Error: Input tidak valid.");
+            statusLabel.setForeground(Color.RED);
+        } catch (Exception e) { // Catch-all terakhir
+            statusLabel.setText("Error Sistem: " + e.getMessage());
+            statusLabel.setForeground(Color.RED);
+            e.printStackTrace();
         }
     }
 
-
-    private void kembaliKeMenu() {
-        Timer timer = new Timer(2000, e -> {
-            mesin.ubahState(new state.StateMenuUtama());
-            ((MainFrame) SwingUtilities.getWindowAncestor(this)).gantiLayar("MENU");
-        });
-        timer.setRepeats(false);
-        timer.start();
-    }
-
-
-    private void validateRekening(String input) {
-        if (input.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nomor rekening tidak boleh kosong!");
-        }
-    }
+    // --- Helper Methods untuk kebersihan kode ---
 
     private double parseNominal(String input) {
         if (input.trim().isEmpty()) {
@@ -231,6 +190,21 @@ public class ViewTransfer extends JPanel {
             throw new IllegalArgumentException("Nominal harus lebih besar dari 0");
         }
         return nominalValue;
+    }
+
+    private void kembaliKeMenu() {
+        Timer timer = new Timer(2000, e -> {
+            mesin.ubahState(new state.StateMenuUtama());
+            ((MainFrame) SwingUtilities.getWindowAncestor(this)).gantiLayar("MENU");
+        });
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private void validateRekening(String input) {
+        if (input.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nomor rekening tidak boleh kosong!");
+        }
     }
 
     public void resetForm() {

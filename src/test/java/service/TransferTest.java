@@ -62,9 +62,11 @@ class TransferTest {
     @Test
     @DisplayName("2. Transfer saldo kurang - Harus gagal")
     void testTransferSaldoTidakCukup() {
+        String noRekPenerima = akunPenerima.getNoRek();
+
         Exception ex = assertThrows(
             IllegalStateException.class,
-            () -> serviceTransfer.transfer(2_000_000, akunPenerima.getNoRek())
+            () -> serviceTransfer.transfer(2_000_000, noRekPenerima)
         );
 
         assertEquals("Saldo tidak cukup", ex.getMessage());
@@ -87,9 +89,11 @@ class TransferTest {
     @Test
     @DisplayName("4. Transfer ke rekening sendiri - Gagal")
     void testTransferKeRekeningSendiri() {
+        String noRekSendiri = akunPengirim.getNoRek();
+
         Exception ex = assertThrows(
             IllegalArgumentException.class,
-            () -> serviceTransfer.transfer(100_000, akunPengirim.getNoRek())
+            () -> serviceTransfer.transfer(100_000, noRekSendiri)
         );
 
         assertEquals("Tidak bisa transfer ke rekening sendiri", ex.getMessage());
