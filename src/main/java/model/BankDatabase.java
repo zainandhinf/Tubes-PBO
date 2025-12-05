@@ -18,14 +18,15 @@ import java.util.logging.Logger;
  * Bertindak sebagai pusat penyimpanan data nasabah (Single Source of Truth).
  * Mendukung mode In-Memory (Dummy) dan Database Eksternal (PostgreSQL).
  */
+@SuppressWarnings("java:S6548")
 public class BankDatabase {
 
     private static final Logger LOGGER = Logger.getLogger(BankDatabase.class.getName());
     
-    // 1. SINGLETON PATTERN: Variabel static untuk menyimpan satu-satunya instance
+    // SINGLETON PATTERN: Variabel static untuk menyimpan satu-satunya instance
     private static BankDatabase instance;
     
-    // 2. JAVA COLLECTION FRAMEWORK: Penyimpanan utama menggunakan HashMap (Cache)
+    // JAVA COLLECTION FRAMEWORK: Penyimpanan utama menggunakan HashMap (Cache)
     // Key: String (Nomor Rekening), Value: Objek Akun
     private Map<String, Akun> accounts = new HashMap<>();
 
@@ -81,51 +82,51 @@ public class BankDatabase {
     }
 
     // ---------------------------------------------------------
-// KONEKSI & LOAD DATA (SQL)
-// ---------------------------------------------------------
+    // KONEKSI & LOAD DATA (SQL)
+    // ---------------------------------------------------------
 
-private Connection getConnection() throws SQLException {
-    return DriverManager.getConnection(dbUrl, dbUser, dbPass);
-}
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
+    }
 
-// ---------------------------------------------------------
-// KONEKSI KE POSTGRESQL
-// ---------------------------------------------------------
-private void loadDataFromSQL() {
-    LOGGER.info(() -> "[DATABASE] Menghubungkan ke PostgreSQL...");
+    // ---------------------------------------------------------
+    // KONEKSI KE POSTGRESQL
+    // ---------------------------------------------------------
+    private void loadDataFromSQL() {
+        LOGGER.info(() -> "[DATABASE] Menghubungkan ke PostgreSQL...");
 
-    try (Connection conn = getConnection()) {
+        try (Connection conn = getConnection()) {
 
-        LOGGER.info(() -> "[DATABASE] Koneksi Sukses!");
+            LOGGER.info(() -> "[DATABASE] Koneksi Sukses!");
 
-        String sql = "SELECT no_rek, pin, saldo, tipe_akun FROM akun";
+            String sql = "SELECT no_rek, pin, saldo, tipe_akun FROM akun";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
-            while (rs.next()) {
-                String noRek = rs.getString("no_rek");
-                String pin = rs.getString("pin");
-                double saldo = rs.getDouble("saldo");
-                String tipe = rs.getString("tipe_akun");
+                while (rs.next()) {
+                    String noRek = rs.getString("no_rek");
+                    String pin = rs.getString("pin");
+                    double saldo = rs.getDouble("saldo");
+                    String tipe = rs.getString("tipe_akun");
 
-                Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
+                    Akun akunBaru = new AkunTabungan(noRek, pin, saldo, tipe);
 
-                // LOAD RIWAYAT TRANSAKSI UNTUK AKUN INI
-                loadHistoriTransaksi(conn, akunBaru);
+                    // LOAD RIWAYAT TRANSAKSI UNTUK AKUN INI
+                    loadHistoriTransaksi(conn, akunBaru);
 
-                tambahAkun(akunBaru);
+                    tambahAkun(akunBaru);
+                }
+
+                LOGGER.info(() -> "[DATABASE] " + accounts.size() + 
+                                " data nasabah & riwayat berhasil dimuat.");
             }
 
-            LOGGER.info(() -> "[DATABASE] " + accounts.size() + 
-                              " data nasabah & riwayat berhasil dimuat.");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "[ERROR] Gagal konek ke Database!", e);
+            loadDummyData(); // fallback
         }
-
-    } catch (SQLException e) {
-        LOGGER.log(Level.SEVERE, "[ERROR] Gagal konek ke Database!", e);
-        loadDummyData(); // fallback
     }
-}
 
 
     /**

@@ -59,7 +59,7 @@ public class MainFrame extends JFrame {
         setLayout(new GridLayout(1, 2));
 
         // ============================================================
-        // 1. BAGIAN KIRI: LAYAR MONITOR (SCREEN)
+        // BAGIAN KIRI: LAYAR MONITOR (SCREEN)
         // ============================================================
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBackground(new Color(25, 30, 40));
@@ -100,7 +100,7 @@ public class MainFrame extends JFrame {
         leftPanel.add(screenBezel, BorderLayout.CENTER);
 
         // ============================================================
-        // 2. BAGIAN KANAN: TOMBOL & KEYPAD (CONTROLS)
+        // BAGIAN KANAN: TOMBOL & KEYPAD (CONTROLS)
         // ============================================================
         JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
         rightPanel.setBackground(new Color(35, 40, 50));
@@ -289,7 +289,6 @@ public class MainFrame extends JFrame {
      * Berfungsi sebagai "Back Button", "Clear Input", atau "Abort Transaction".
      */
     private void handleCancelPressed() {
-        // 1. Selalu bersihkan inputan teks dulu
         inputBuffer.setLength(0);
         currentInputBuffer = "";
         updateActiveView();
@@ -300,8 +299,6 @@ public class MainFrame extends JFrame {
             mesin.getStateSaatIni().getClass().getSimpleName()
         );
 
-
-        // 2. Cek State saat ini untuk menentukan aksi "Kembali"
         state.StateATM currentState = mesin.getStateSaatIni();
 
         if (isReturnToMenuState(currentState)) {
@@ -313,9 +310,5 @@ public class MainFrame extends JFrame {
         } else if (currentState instanceof state.StateMenuUtama) {
             mesin.keluar();
         }
-
-
-        // Jika di StateSiaga (Welcome), Cancel hanya menghapus input (sudah dilakukan
-        // di langkah 1)
     }
 }

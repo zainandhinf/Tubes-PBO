@@ -11,7 +11,6 @@ import exception.RekeningTidakDitemukanException;
  * Interface ITransaksi
  * Merupakan "Kontrak Bisnis" yang mendefinisikan operasi apa saja 
  * yang harus dimiliki oleh sistem ATM (baik Proxy maupun RealAccount).
- * * Penanggung Jawab: Bersama (Disepakati di awal)
  */
 public interface ITransaksi {
 

@@ -22,14 +22,14 @@ public class ViewRiwayat extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(25, 30, 40));
 
-        // 1. Header
+        // Header
         JLabel lblHeader = new JLabel("MUTASI REKENING", SwingConstants.CENTER);
         lblHeader.setFont(new Font("Arial", Font.BOLD, 24));
         lblHeader.setForeground(new Color(0, 200, 255));
         lblHeader.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         add(lblHeader, BorderLayout.NORTH);
 
-        // 2. Area Teks Riwayat
+        // Area Teks Riwayat
         textInfo = new JTextArea();
         textInfo.setFont(new Font("Monospaced", Font.PLAIN, 16));
         textInfo.setEditable(false);
@@ -50,7 +50,7 @@ public class ViewRiwayat extends JPanel {
         
         add(centerPanel, BorderLayout.CENTER);
 
-        // 3. Footer Instruksi
+        // Footer Instruksi
         JLabel lblFooter = new JLabel("Tekan CANCEL untuk Kembali", SwingConstants.CENTER);
         lblFooter.setFont(new Font("Arial", Font.ITALIC, 14));
         lblFooter.setForeground(Color.GRAY);

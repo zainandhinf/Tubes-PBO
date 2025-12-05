@@ -23,14 +23,14 @@ public class ViewMenu extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(25, 30, 40));
 
-        // 1. Header
+        // Header
         JLabel lblHeader = new JLabel("SILAKAN PILIH TRANSAKSI", SwingConstants.CENTER);
         lblHeader.setFont(new Font(UIConstants.FONT_ARIAL, Font.BOLD, 24));
         lblHeader.setForeground(new Color(0, 200, 255));
         lblHeader.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(lblHeader, BorderLayout.NORTH);
 
-        // 2. Grid Menu (Tampilan Label Saja)
+        // Grid Menu (Tampilan Label Saja)
         JPanel menuPanel = new JPanel(new GridLayout(3, 2, 20, 20));
         menuPanel.setBackground(new Color(25, 30, 40));
         menuPanel.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
@@ -52,7 +52,7 @@ public class ViewMenu extends JPanel {
 
         add(menuPanel, BorderLayout.CENTER);
         
-        // 3. Footer dengan Input Display
+        // Footer dengan Input Display
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(new Color(25, 30, 40));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(20, 100, 30, 100)); // Padding kiri kanan besar biar input di tengah

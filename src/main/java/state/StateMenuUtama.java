@@ -3,6 +3,7 @@ package state;
 import javax.swing.JOptionPane;
 import java.util.logging.Logger;
 import service.ProxyAkun;
+import util.Validator;
 import view.MainFrame;
 
 /**
@@ -15,6 +16,19 @@ public class StateMenuUtama implements StateATM {
     
     @Override
     public void pilihMenu(MesinATM atm, int pilihan) {
+        Validator<Integer> menuValidator = new Validator<>(pilihan);
+
+        // Rule: Menu hanya ada 1 sampai 6
+        boolean isMenuValid = menuValidator.validate(i -> i >= 1 && i <= 6);
+
+        if (!isMenuValid) {
+            JOptionPane.showMessageDialog(null, 
+                "Menu tidak tersedia! Pilih angka 1-6.", 
+                "Input Invalid", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         MainFrame frame = (MainFrame) atm.getJendelaUtama();
 
         switch (pilihan) {

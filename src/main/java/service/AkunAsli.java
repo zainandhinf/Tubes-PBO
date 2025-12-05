@@ -10,9 +10,6 @@ import model.BankDatabase;
  * Kelas AkunAsli (Real Subject)
  * Merupakan implementasi "Real Subject" dalam Proxy Pattern.
  * Kelas ini berisi logika bisnis sesungguhnya (pengurangan/penambahan saldo).
- * * ⚠️ CATATAN PENTING:
- * File ini adalah kerangka sementara (Dummy) agar ProxyAkun tidak error saat di-compile.
- * Logika detail (matematika saldo) akan diisi oleh PIC: Faridha & Suci.
  */
 public class AkunAsli implements ITransaksi {
     private Akun akun;

@@ -22,14 +22,14 @@ public class ViewCekSaldo extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(25, 30, 40));
 
-        // 1. Header
+        // Header
         JLabel lblHeader = new JLabel("INFORMASI SALDO", SwingConstants.CENTER);
         lblHeader.setFont(new Font(UIConstants.FONT_ARIAL, Font.BOLD, 24));
         lblHeader.setForeground(new Color(0, 200, 255));
         lblHeader.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
         add(lblHeader, BorderLayout.NORTH);
 
-        // 2. Content (Saldo)
+        // Content (Saldo)
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(25, 30, 40));
 
@@ -52,7 +52,7 @@ public class ViewCekSaldo extends JPanel {
 
         add(contentPanel, BorderLayout.CENTER);
 
-        // 3. Footer
+        // Footer
         JLabel lblFooter = new JLabel("Tekan CANCEL untuk kembali ke Menu Utama", SwingConstants.CENTER);
         lblFooter.setFont(new Font(UIConstants.FONT_ARIAL, Font.ITALIC, 14));
         lblFooter.setForeground(Color.GRAY);

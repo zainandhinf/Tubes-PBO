@@ -39,14 +39,14 @@ public class ViewSetorTunai extends JPanel {
     }
     
     private void initComponents() {
-        // 1. Header
+        // Header
         JLabel lblHeader = new JLabel("SETOR TUNAI", SwingConstants.CENTER);
         lblHeader.setFont(new Font(UIConstants.FONT_ARIAL, Font.BOLD, 24));
         lblHeader.setForeground(new Color(0, 200, 255));
         lblHeader.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         add(lblHeader, BorderLayout.NORTH);
         
-        // 2. Content Panel 
+        // Content Panel 
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(40, 45, 55));
         contentPanel.setBorder(BorderFactory.createLineBorder(new Color(0, 150, 200), 2));
@@ -111,7 +111,7 @@ public class ViewSetorTunai extends JPanel {
         
         add(centerPanel, BorderLayout.CENTER);
 
-        // 3. Footer Instruksi
+        // Footer Instruksi
         JLabel lblFooter = new JLabel("Tekan ENTER untuk konfirmasi | CANCEL untuk kembali", SwingConstants.CENTER);
         lblFooter.setFont(new Font(UIConstants.FONT_ARIAL, Font.ITALIC, 14));
         lblFooter.setForeground(Color.GRAY);
