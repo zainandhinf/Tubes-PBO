@@ -174,6 +174,9 @@ public class ViewTransfer extends JPanel {
         } catch (IllegalArgumentException e) {
             statusLabel.setText("Error: " + e.getMessage());
             statusLabel.setForeground(Color.RED);
+        } catch (Exception e) {
+            statusLabel.setText("Error: " + e.getMessage());
+            statusLabel.setForeground(Color.RED);
         }
     }
 
