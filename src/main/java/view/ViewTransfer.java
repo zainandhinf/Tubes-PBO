@@ -148,8 +148,8 @@ public class ViewTransfer extends JPanel {
                 statusLabel.setForeground(Color.CYAN);
                 inputPromptLabel.setText("Transfer selesai. Tekan CANCEL untuk kembali ke menu.");
                 
-                // Kembali ke menu setelah 2 detik
-                Timer timer = new Timer(2000, e -> {
+                // Kembali ke menu setelah 5 detik
+                Timer timer = new Timer(5000, e -> {
                     mesin.ubahState(new state.StateMenuUtama());
                     ((MainFrame) SwingUtilities.getWindowAncestor(this)).gantiLayar("MENU");
                 });
