@@ -140,13 +140,41 @@ public class ViewTransfer extends JPanel {
                 statusLabel.setText("Status: Menunggu input nominal...");
                 statusLabel.setForeground(Color.ORANGE);
             } else {
-                double nominalValue = parseNominal(input);
-                performTransfer(nominalValue); // pindahkan nested try ke sini
+                if (input.trim().isEmpty()) {
+                    throw new Exception("Nominal tidak boleh kosong!");
+                }
+                
+                // Parse nominal dengan support format ribuan
+                String cleanInput = input.replace(".", "").replace(",", "");
+                double nominalValue = Double.parseDouble(cleanInput);
+                
+                if (nominalValue <= 0) {
+                    throw new Exception("Nominal harus lebih besar dari 0");
+                }
+                
+                // Proses transfer
+                mesin.getProxy().transfer(nominalValue, rekeningTujuan);
+                
+                statusLabel.setText("Status: Transfer berhasil!");
+                statusLabel.setForeground(Color.CYAN);
+                inputPromptLabel.setText("Transfer selesai. Tekan CANCEL untuk kembali ke menu.");
+                
+                // Kembali ke menu setelah 5 detik
+                Timer timer = new Timer(5000, e -> {
+                    mesin.ubahState(new state.StateMenuUtama());
+                    ((MainFrame) SwingUtilities.getWindowAncestor(this)).gantiLayar("MENU");
+                });
+                timer.setRepeats(false);
+                timer.start();
+                
             }
         } catch (NumberFormatException e) {
             statusLabel.setText("Error: Nominal harus berupa angka yang valid!");
             statusLabel.setForeground(Color.RED);
         } catch (IllegalArgumentException e) {
+            statusLabel.setText("Error: " + e.getMessage());
+            statusLabel.setForeground(Color.RED);
+        } catch (Exception e) {
             statusLabel.setText("Error: " + e.getMessage());
             statusLabel.setForeground(Color.RED);
         }

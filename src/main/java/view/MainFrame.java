@@ -118,17 +118,21 @@ public class MainFrame extends JFrame {
             if (k.equals("CLEAR")) {
                 btn.setBackground(new Color(220, 150, 0));
                 btn.addActionListener(e -> {
+                    // Clear KEDUA variabel
                     inputBuffer.setLength(0);
                     currentInputBuffer = "";
                     updateActiveView();
+                    LOGGER.log(Level.INFO, "[CLEAR] Buffer dikosongkan");
                 });
             } else if (k.equals("<")) {
                 btn.setBackground(new Color(150, 50, 50));
                 btn.addActionListener(e -> {
-                    if (!inputBuffer.isEmpty()) { 
-                        inputBuffer.deleteCharAt(inputBuffer.length() - 1);
+                    // Hapus karakter terakhir dari KEDUA variabel
+                    if (!inputBuffer.isEmpty()) {
+                        inputBuffer.setLength(inputBuffer.length() - 1);
                         currentInputBuffer = inputBuffer.toString();
                         updateActiveView();
+                        LOGGER.log(Level.INFO, "[DELETE] Buffer sekarang: ''{0}''", currentInputBuffer);
                     }
                 });
             } else {
