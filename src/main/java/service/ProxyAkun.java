@@ -2,9 +2,12 @@ package service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import exception.GagalLoginException;
 import model.Akun;
+
 
 /**
  * Kelas ProxyAkun
@@ -13,6 +16,7 @@ import model.Akun;
  * Memastikan user sudah login sebelum bisa melakukan transaksi.
  */
 public class ProxyAkun implements ITransaksi {
+    private static final Logger LOGGER = Logger.getLogger(ProxyAkun.class.getName());
     
     private AkunAsli akunAsli; // Referensi ke Objek Asli (Real Subject)
     private boolean isLogin = false; // Status Sesi
@@ -26,7 +30,7 @@ public class ProxyAkun implements ITransaksi {
             this.isLogin = true;
             // Lazy Initialization: AkunAsli baru dibuat saat login sukses
             this.akunAsli = new AkunAsli(akun);
-            System.out.println("[PROXY] Login Berhasil untuk: " + akun.getNoRek());
+            LOGGER.log(Level.INFO, "[PROXY] Login Berhasil untuk: {0}", akun.getNoRek());
         } else {
             throw new GagalLoginException("PIN Salah! Akses ditolak.");
         }
@@ -39,13 +43,13 @@ public class ProxyAkun implements ITransaksi {
     public void logout() {
         this.isLogin = false;
         this.akunAsli = null;
-        System.out.println("[PROXY] Sesi diakhiri.");
+        LOGGER.info("[PROXY] Sesi diakhiri.");
     }
 
     // --- IMPLEMENTASI ITRANSAKSI (Dicegat Dulu) ---
 
     @Override
-    public void tarikTunai(double jumlah) throws Exception {
+    public void tarikTunai(double jumlah) {
         if (isLogin) {
             akunAsli.tarikTunai(jumlah); // Teruskan ke Real Subject
         } else {
@@ -54,7 +58,7 @@ public class ProxyAkun implements ITransaksi {
     }
 
     @Override
-    public void setorTunai(double jumlah) throws Exception {
+    public void setorTunai(double jumlah) {
         if (isLogin) {
             akunAsli.setorTunai(jumlah);
         } else {
@@ -63,7 +67,7 @@ public class ProxyAkun implements ITransaksi {
     }
 
     @Override
-    public void transfer(double jumlah, String tujuan) throws Exception {
+    public void transfer(double jumlah, String tujuan) {
         if (isLogin) {
             akunAsli.transfer(jumlah, tujuan);
         } else {

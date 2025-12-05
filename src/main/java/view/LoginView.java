@@ -11,7 +11,15 @@ import java.awt.*;
  * Menggunakan JPanel agar bisa dimasukkan ke dalam MainFrame (CardLayout).
  */
 public class LoginView extends JPanel {
-    private MesinATM mesin;
+    
+    /**
+     * Instans MesinATM yang digunakan oleh view ini.
+     * Ditandai sebagai transient karena komponen Swing dapat diserialisasi,
+     * sedangkan MesinATM tidak perlu dan tidak aman untuk ikut diserialisasi.
+     */
+    @SuppressWarnings("unused")
+    private transient MesinATM mesin;
+
     private JPasswordField pinField;
 
     public LoginView(MesinATM mesin) {
@@ -29,7 +37,7 @@ public class LoginView extends JPanel {
         
         pinField = new JPasswordField(6);
         pinField.setFont(new Font("Arial", Font.BOLD, 32));
-        pinField.setHorizontalAlignment(JPasswordField.CENTER);
+        pinField.setHorizontalAlignment(SwingConstants.CENTER);
         pinField.setEditable(false);
         pinField.setBackground(Color.WHITE);
         

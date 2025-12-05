@@ -1,10 +1,6 @@
 package state;
 
 import view.MainFrame;
-import view.ViewRiwayat;
-import java.util.List;
-import javax.swing.JPanel;
-import java.awt.Component;
 
 public class StateRiwayat implements StateATM {
 
@@ -30,8 +26,8 @@ public class StateRiwayat implements StateATM {
 
     private void kembaliKeMenu(MesinATM atm) {
         atm.ubahState(new StateMenuUtama());
-        if (atm.getJendelaUtama() instanceof MainFrame) {
-            ((MainFrame) atm.getJendelaUtama()).gantiLayar("MENU");
+        if (atm.getJendelaUtama() instanceof MainFrame mainframe) {
+            mainframe.gantiLayar("LOGIN");
         }
     }
 

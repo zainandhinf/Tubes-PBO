@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import state.MesinATM;
 import state.StateTransfer;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Kelas MainFrame
@@ -13,8 +15,14 @@ import state.StateTransfer;
  * - Kanan: Panel Kontrol (Statis, berisi Keypad & Tombol Aksi)
  */
 public class MainFrame extends JFrame {
+    private static final Logger LOGGER = Logger.getLogger(MainFrame.class.getName());
 
-    private MesinATM mesin;
+    /**
+     * Instans MesinATM yang digunakan oleh view ini.
+     * Ditandai sebagai transient karena komponen Swing dapat diserialisasi,
+     * sedangkan MesinATM tidak perlu dan tidak aman untuk ikut diserialisasi.
+     */
+    private transient MesinATM mesin;
 
     // Panel Kiri (Layar Monitor)
     private JPanel screenContainer;
@@ -29,18 +37,29 @@ public class MainFrame extends JFrame {
     // Setor tunai view components
     private ViewSetorTunai setorTunaiView;
 
+    // Helper untuk cek apakah state saat ini adalah salah satu state yang kembali ke menu utama
+    private boolean isReturnToMenuState(state.StateATM s) {
+        return s instanceof state.StateRiwayat ||
+            s instanceof StateTransfer ||
+            s instanceof state.StateSetorTunai ||
+            s instanceof state.StateCekSaldo ||
+            s instanceof state.StateTarikTunai;
+    }
+
+    private final StringBuilder inputBuffer = new StringBuilder();
+
     public MainFrame(MesinATM mesin) {
         this.mesin = mesin;
 
         setTitle("SIMULASI ATM BANK POLBAN");
         setSize(1000, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
         setLayout(new GridLayout(1, 2));
 
         // ============================================================
-        // 1. BAGIAN KIRI: LAYAR MONITOR (SCREEN)
+        // BAGIAN KIRI: LAYAR MONITOR (SCREEN)
         // ============================================================
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBackground(new Color(25, 30, 40));
@@ -81,7 +100,7 @@ public class MainFrame extends JFrame {
         leftPanel.add(screenBezel, BorderLayout.CENTER);
 
         // ============================================================
-        // 2. BAGIAN KANAN: TOMBOL & KEYPAD (CONTROLS)
+        // BAGIAN KANAN: TOMBOL & KEYPAD (CONTROLS)
         // ============================================================
         JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
         rightPanel.setBackground(new Color(35, 40, 50));
@@ -99,20 +118,23 @@ public class MainFrame extends JFrame {
             if (k.equals("CLEAR")) {
                 btn.setBackground(new Color(220, 150, 0));
                 btn.addActionListener(e -> {
+                    inputBuffer.setLength(0);
                     currentInputBuffer = "";
                     updateActiveView();
                 });
             } else if (k.equals("<")) {
                 btn.setBackground(new Color(150, 50, 50));
                 btn.addActionListener(e -> {
-                    if (currentInputBuffer.length() > 0) {
-                        currentInputBuffer = currentInputBuffer.substring(0, currentInputBuffer.length() - 1);
+                    if (!inputBuffer.isEmpty()) { 
+                        inputBuffer.deleteCharAt(inputBuffer.length() - 1);
+                        currentInputBuffer = inputBuffer.toString();
                         updateActiveView();
                     }
                 });
             } else {
                 btn.addActionListener(e -> {
-                    currentInputBuffer += k;
+                    inputBuffer.append(k);
+                    currentInputBuffer = inputBuffer.toString();
                     updateActiveView();
                 });
             }
@@ -156,52 +178,61 @@ public class MainFrame extends JFrame {
 
     public void gantiLayar(String namaLayar) {
         cardLayout.show(screenContainer, namaLayar);
+        inputBuffer.setLength(0);
         currentInputBuffer = "";
 
-        // LOGIKA UPDATE DATA OTOMATIS
-        if (namaLayar.equals("RIWAYAT")) {
-            for (Component comp : screenContainer.getComponents()) {
-                if (comp instanceof ViewRiwayat) {
-                    try {
-                        // AMBIL DATA DARI PROXY
-                        java.util.List<String> logs = mesin.getProxy().getRiwayat();
-                        ((ViewRiwayat) comp).updateData(logs);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        switch (namaLayar) {
+            case "RIWAYAT" -> updateRiwayatView();
+            case "CEK_SALDO" -> updateCekSaldoView();
+            case "TARIK_TUNAI" -> resetTarikTunaiView();
+            case "TRANSFER" -> transferView.resetForm();
+            case "SETOR_TUNAI" -> setorTunaiView.resetForm();
+            default -> {
+                // Tidak ada aksi khusus
             }
-        } else if (namaLayar.equals("CEK_SALDO")) {
-            for (Component comp : screenContainer.getComponents()) {
-                if (comp instanceof ViewCekSaldo) {
-                    try {
-                        double saldo = mesin.getProxy().cekSaldo();
-                        ((ViewCekSaldo) comp).updateSaldo(saldo);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } else if (namaLayar.equals("TARIK_TUNAI")) {
-            // Reset input field saat masuk layar tarik tunai
-            for (Component comp : screenContainer.getComponents()) {
-                if (comp instanceof ViewTarikTunai) {
-                    ((ViewTarikTunai) comp).updateInput("");
-                }
-            }
-        } else if (namaLayar.equals("TRANSFER")) {
-            transferView.resetForm();
-        } else if (namaLayar.equals("SETOR_TUNAI")) {
-            setorTunaiView.resetForm();
         }
 
         updateActiveView();
     }
 
+    private void updateRiwayatView() {
+        for (Component comp : screenContainer.getComponents()) {
+            if (comp instanceof ViewRiwayat view) {
+                try {
+                    var logs = mesin.getProxy().getRiwayat();
+                    view.updateData(logs);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void updateCekSaldoView() {
+        for (Component comp : screenContainer.getComponents()) {
+            if (comp instanceof ViewCekSaldo view) {
+                try {
+                    double saldo = mesin.getProxy().cekSaldo();
+                    view.updateSaldo(saldo);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void resetTarikTunaiView() {
+        for (Component comp : screenContainer.getComponents()) {
+            if (comp instanceof ViewTarikTunai view) {
+                view.updateInput("");
+            }
+        }
+    }
+
+
     private void handleEnterPressed() {
         String input = currentInputBuffer;
-        System.out.println("[DEBUG] Input dikirim: " + input);
+        LOGGER.log(Level.INFO, "[DEBUG] Input dikirim: {0}", input);
 
         if (mesin.getStateSaatIni() instanceof state.StateSiaga) {
             mesin.masukkanKartu(input);
@@ -212,6 +243,7 @@ public class MainFrame extends JFrame {
                 int pilihan = Integer.parseInt(input);
                 mesin.pilihMenu(pilihan);
             } catch (NumberFormatException e) {
+                LOGGER.log(Level.WARNING, "Input tidak valid", e);
             }
         } else if (mesin.getStateSaatIni() instanceof state.StateTarikTunai) {
             try {
@@ -219,7 +251,7 @@ public class MainFrame extends JFrame {
                 double nominal = Double.parseDouble(input.replace(".", "").replace(",", ""));
                 mesin.prosesJumlah(nominal);
             } catch (NumberFormatException e) {
-                System.out.println("[ERROR] Input nominal tidak valid: " + input);
+                LOGGER.log(Level.WARNING, "[ERROR] Input nominal tidak valid: {0}", input);
             }
         } else if (mesin.getStateSaatIni() instanceof StateTransfer) {
             transferView.handleInput(input);
@@ -227,6 +259,7 @@ public class MainFrame extends JFrame {
             setorTunaiView.handleInput(input);
         }
 
+        inputBuffer.setLength(0);
         currentInputBuffer = "";
         updateActiveView();
     }
@@ -234,20 +267,19 @@ public class MainFrame extends JFrame {
     private void updateActiveView() {
         for (Component comp : screenContainer.getComponents()) {
             if (comp.isVisible()) {
-                if (comp instanceof WelcomeView) {
-                    ((WelcomeView) comp).updateCardDisplay(currentInputBuffer);
-                } else if (comp instanceof LoginView) {
-                    ((LoginView) comp).updatePinDisplay(currentInputBuffer);
-                } else if (comp instanceof ViewMenu) {
-                    ((ViewMenu) comp).updateMenuInput(currentInputBuffer);
-                } else if (comp instanceof ViewTarikTunai) {
-                    ((ViewTarikTunai) comp).updateInput(currentInputBuffer);
-                } else if (comp instanceof ViewTransfer) {
-                    ((ViewTransfer) comp).updateInput(currentInputBuffer);
-                } else if (comp instanceof ViewSetorTunai) {
-                    ((ViewSetorTunai) comp).updateInput(currentInputBuffer);
+                if (comp instanceof WelcomeView welcomeView) {
+                    welcomeView.updateCardDisplay(currentInputBuffer);
+                } else if (comp instanceof LoginView loginView) {
+                    loginView.updatePinDisplay(currentInputBuffer);
+                } else if (comp instanceof ViewMenu viewMenu) {
+                    viewMenu.updateMenuInput(currentInputBuffer);
+                } else if (comp instanceof ViewTarikTunai viewTarikTunai) {
+                    viewTarikTunai.updateInput(currentInputBuffer);
+                } else if (comp instanceof ViewTransfer viewTransfer) {
+                    viewTransfer.updateInput(currentInputBuffer);
+                } else if (comp instanceof ViewSetorTunai viewSetorTunai) {
+                    viewSetorTunai.updateInput(currentInputBuffer);
                 }
-                // Nanti tambahkan: else if (comp instanceof WithdrawView) ...
             }
         }
     }
@@ -257,48 +289,26 @@ public class MainFrame extends JFrame {
      * Berfungsi sebagai "Back Button", "Clear Input", atau "Abort Transaction".
      */
     private void handleCancelPressed() {
-        // 1. Selalu bersihkan inputan teks dulu
+        inputBuffer.setLength(0);
         currentInputBuffer = "";
         updateActiveView();
 
-        System.out.println(
-                "[DEBUG] Tombol CANCEL ditekan pada State: " + mesin.getStateSaatIni().getClass().getSimpleName());
+        LOGGER.log(
+            Level.INFO,
+            "[DEBUG] Tombol CANCEL ditekan pada State: {0}",
+            mesin.getStateSaatIni().getClass().getSimpleName()
+        );
 
-        // 2. Cek State saat ini untuk menentukan aksi "Kembali"
         state.StateATM currentState = mesin.getStateSaatIni();
 
-        if (currentState instanceof state.StateRiwayat) {
+        if (isReturnToMenuState(currentState)) {
             mesin.ubahState(new state.StateMenuUtama());
             gantiLayar("MENU");
-        } else if (currentState instanceof StateTransfer) {
-            mesin.ubahState(new state.StateMenuUtama());
-            gantiLayar("MENU");
-        } else if (currentState instanceof state.StateSetorTunai) {
-            mesin.ubahState(new state.StateMenuUtama());
-            gantiLayar("MENU");
-        } else if (currentState instanceof state.StateCekSaldo) {
-            // Jika di Layar Cek Saldo -> Kembali ke Menu Utama
-            mesin.ubahState(new state.StateMenuUtama());
-            gantiLayar("MENU");
-
-        } else if (currentState instanceof state.StateTarikTunai ||
-                currentState instanceof state.StateSetorTunai ||
-                currentState instanceof state.StateTransfer) {
-            // Jika sedang Input Nominal Transaksi -> Batal & Kembali ke Menu Utama
-            mesin.ubahState(new state.StateMenuUtama());
-            gantiLayar("MENU");
-
         } else if (currentState instanceof state.StateCekPin) {
-            // Jika sedang Input PIN -> Batal Login (Kembali ke Welcome)
             mesin.ubahState(new state.StateSiaga());
             gantiLayar("WELCOME");
-
         } else if (currentState instanceof state.StateMenuUtama) {
-            // Jika di Menu Utama -> Sama dengan tombol Exit/Keluar
             mesin.keluar();
         }
-
-        // Jika di StateSiaga (Welcome), Cancel hanya menghapus input (sudah dilakukan
-        // di langkah 1)
     }
 }

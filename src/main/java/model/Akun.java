@@ -18,7 +18,7 @@ public abstract class Akun {
     private List<String> historiTransaksi = new ArrayList<>();
 
     // Constructor
-    public Akun(String noRek, String pin, double saldo, String tipeAkun) {
+    protected Akun(String noRek, String pin, double saldo, String tipeAkun) {
         this.noRek = noRek;
         this.pin = pin;
         this.saldo = saldo;
